@@ -1,5 +1,7 @@
 #!/usr/bin/env tclsh
 
+# сливает файлы, соответствующие маске, в один выходной файл, для подготовки аудио-файлов
+
 proc combine_files {mask output_file} {
 	# Открываем выходной файл для записи
 	set out_fh [open $output_file w]
