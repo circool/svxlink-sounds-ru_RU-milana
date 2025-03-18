@@ -312,7 +312,7 @@ namespace eval MetarInfo {
   # Диапазон значений от ... до ...
   # ceiling varies $from $to
   proc ceilingvaries {from to} {
-    puts "ceiling varies $from $to"
+    puts "ceilingvaries $from $to"
     playMsg "ca"
     playSilence 50
     playMsg "varies_from"
