@@ -7,7 +7,8 @@ if [ -z "$ip_svxlink" ]; then
     exit 1
 fi
 
-
+# обновляем словарь
+./utils/gen_dict.tcl -r ../audio_generating
 # выгружает рабочие файлы на сервер
 scp locale.tcl 		root@$ip_svxlink:/usr/share/svxlink/sounds/ru_RU/events.d/local
 scp dict.tcl 		root@$ip_svxlink:/usr/share/svxlink/sounds/ru_RU/events.d/local
