@@ -2,11 +2,408 @@
 # aka circool
 # aka R2ADU
 
-# Время
-proc playTime {hour minute} {
-	
-	variable Logic::CFG_TIME_FORMAT
 
+# разбивает число на составляющие, которые могут быть представлены базовыми единицами в диапазоне от 0 до 999 для целых чисел 
+# или от 0 до 99 для дробных частей.
+# отправляет их в playNumbers по очереди как количественно-именное сочетание
+# Параметры:
+# 	value 	- число (-999999.99 ... 999999.99) - именная часть
+#	[unit]	- строка ( minute | hour | unit* ) - количественная часть
+#	[unit]	- строка ( _range ) - признак винительного падежа (для количественной и именной частей)
+# Описание логики
+#  - для дробных чисел лидирующие нули целой части отбрасываются
+#  - обрабатываются только 2 разряда дробной части
+#  - для винительного падежа женский род применяется только для чисел заканчивающихся на "1"
+proc playNumberUnit { value {unit ""} } {
+	# числа произносим в модуле "Default"
+	set modulename "Default"
+
+	# знак
+	if {$value < 0} {
+		playMsg "Default" "minus"
+		# Убираем знак для дальнейшей обработки
+		set value [expr {abs($value)}]
+	}
+
+	# нулевая целая часть 
+	set isZeroIntegerPart [expr {$value < 1}]
+
+	# тысячи
+	set thousands [expr {int($value / 1000)}]	
+	if {$thousands > 0} {		
+		# винительный падеж
+		if { [string match "*_range" $unit] } {
+			set units "thousand_range"
+		} else {
+			set units "thousand"
+		}
+		playNumbers $thousands $units
+		set value [expr {$value - $thousands * 1000}]
+	}
+	# из value были удалены тысячи
+
+	# целые (от 1 до 999)
+	# puts "начало проверки целых"
+	set integerPart [expr {int(floor($value))}]
+	if {$integerPart > 0} {	
+		# произносим количество диапазона 1-999,
+		# если дробной части нет, склоняем его к единице измерения
+		# иначе склоняем к слову "целых/целая"
+		if {$value != int($value)} {
+						
+			if { [string match "*_range" $unit] } {
+				# винительный падеж
+				playNumbers $integerPart "integer_range"
+			} else {
+				# именительный падеж
+				playNumbers $integerPart "integer"
+			}
+
+		} else {
+			playNumbers $integerPart $unit
+		}
+		# удаляем целую часть и форматируем		
+		set value [format %.2f [expr {$value - $integerPart}]]		
+	}
+	# из value удалена целая часть, остаток отформатирован до 2 знака после точки
+	
+	# дробная часть
+	# Если ноль в целой части, нет тысяч, произносим "ноль" или [от] "ноля"
+	# работает как для винительного, так и для именительного падежа
+	if { $isZeroIntegerPart} {
+		set actualUnit "integer"
+		if { [string match "*_range" $unit] } {
+			# винительный падеж		
+			set actualUnit "integer_range"
+		}
+		set suffix [getNumberSuffix "0" $actualUnit]
+		playMsg "Default" "0${suffix}"
+	}
+	
+	if { $value > 0} {
+		
+		# произношение "целых" для чисел с нулевой целой частью проверено - работает как для винительного, так и для именительного падежа
+		if { $isZeroIntegerPart || $integerPart==0 } {		
+			if { [string match "*_range" $unit] } {
+				# винительный падеж
+				set suffix [getUnitSuffix "integer_range" "0" ]
+			} else {
+				# именительный падеж
+				set suffix [getUnitSuffix "integer" "0" ]
+			}
+			playMsg "Default" "integer${suffix}"			
+		}
+
+		playMsg "Default" "and"
+
+		# тут произносятся числа (десятых и сотых) долей
+		if { [string match "*_range" $unit] } {
+			# винительный падеж
+			if {[expr {abs($value - [format %.1f $value]) < 0.0001}]} {
+				playNumbers [expr {int([format %.1f $value] * 10)}] "tenth_range"
+			} else {
+				playNumbers [expr {int([format %.2f $value] * 100)}] "hundredth_range"
+			}
+			
+		} else {
+			
+			# именительный падеж
+			if {[expr {abs($value - [format %.1f $value]) < 0.0001}]} {
+				playNumbers [expr {int([format %.1f $value] * 10)}] "tenth"
+			} else {
+				playNumbers [expr {int([format %.2f $value] * 100)}] "hundredth"
+			}
+		}		
+	}
+}
+# Процедура для воспроизведения числа с единицей измерения
+
+
+
+# locale.tcl
+# Воспроизведение количества value в диапазоне (0-999)
+# единица измерения unit служит только для определения рода/склонения и не произносится
+# исключение - тысячи, целые, десятые, сотые
+proc playNumbers {value {unit ""} } {
+
+	# для тестов.
+	set modulename "Default"
+
+
+	# Ошибка для чисел вне рабочего диапазона
+	if {!([string is integer -strict $value] && $value <= 999) } {
+		puts "ERROR*** playNumbers получил недопустимое число ($value)"
+		return
+	}
+
+	# определяем какие единицы произносить после числа (тысячи, целые, десятые, сотые и их сочетания с _range)
+	set validUnits { thousand integer tenth hundredth thousand_range integer_range tenth_range hundredth_range}
+	
+	# работаем с сотнями
+	set hundreds [expr {$value / 100}]
+	if { $hundreds > 0} {
+		if { [string match "*_range" $unit] } {
+			playMsg "Default" "${hundreds}00[getNumberSuffix $value $unit]"
+		} else { 
+			playMsg "Default" "${hundreds}00"
+		}
+		# удаляем сотни
+		set value [expr {$value - $hundreds * 100}]
+	}
+
+
+	# работаем с десятками (только если число заканчивается на 20+)
+	set tens [expr {$value / 10}]
+	if {$tens >= 2} {
+		#  для винительного падежа выясняем суффикс исходя из десятки * 10
+		if { [string match "*_range" $unit] } {
+			set tensValue [expr {$tens * 10}]
+			playMsg "Default" "${tens}X[getNumberSuffix $tensValue $unit]"
+		} else {
+			playMsg "Default" "${tens}X"
+		}
+		# удаляем десятки
+		set value [expr {$value - $tens * 10}]
+	}
+
+	
+
+	# работаем с единицами (от 1 до 19)
+	if {$value > 0} {
+		set suffix [getNumberSuffix $value $unit]
+		playMsg "Default" "${value}${suffix}"
+	}
+
+
+
+	# работаем с именной частью
+	if { $unit in $validUnits && ($value > 0 || $tens > 0 || $hundreds > 0) } {
+		
+		# отделяем range от основной части
+		set mainUnit [string map {"_range" ""} $unit]
+		set suffix [getUnitSuffix $unit $value]
+		set suffix_range [getUnitSuffix $mainUnit $value]
+		if {[string match "*_range" $unit]} {
+			# puts "\nDEBUG ошибка в единице $unit"
+			set unit [string map {"_range" ""} $unit]
+		}
+		playMsg "Default" "${unit}${suffix}"
+	}
+}
+
+
+# Воспроизведение единицы измерения unit в правильном падеже и количественной форме
+# количественная quantity часть служит для определения единственной или
+# множественной формы именной части и не произносится
+proc playUnit { unit quantity } {
+
+	set modulename [getModuleName $unit]
+	
+	# специальная логика для винительного падежа
+	if { [string match "*_range" $unit] } {		
+
+		# для целых тысяч, единицей измерения выступает "тысяча/тысячи/тысяч"
+		# встречается только в винительном падеже, поэтому устанавливаем падеж принудительно и произносим полученную единицу
+		if {$quantity >= 1000 } {
+			set unit [string map {"_range" ""} $unit]
+			playMsg $modulename "${unit}2"
+			return
+		}	
+		
+		# для дробных чисел склонение нужно приводить относительно слов "десятая" или "сотая"
+		set integerPart [expr {int($quantity)}]
+		set fractial [expr {$quantity - $integerPart}]
+		if { $fractial != 0 } {
+			set unit [string map {"_range" ""} $unit]
+			playMsg $modulename "${unit}1"
+			return
+		}
+	}
+
+	# для дробных чисел используются только
+	# именные сочетания для множественной формы именительного или винительного падежа
+	if { [expr {$quantity != int($quantity)}] } {		
+		set quantity 2
+	}
+	
+	# получаем базовое числительное
+	set numeral [getNumeral $quantity]
+	
+	# если в unit есть "_range", получаем суффикс, посе чего удаляем "_range" из $unit и произносим полученную единицу
+	if {[string match "*_range" $unit]} {
+		set suffix [getUnitSuffix $unit $numeral]
+		set unit [string map {"_range" ""} $unit]
+	} else {
+		set suffix [getUnitSuffix $unit $numeral]	
+	}
+
+	playMsg $modulename "${unit}${suffix}"
+}
+
+
+# Возвращает род единицы измерения 
+# если вместо единицы измерения получен род или диапазон - возвращается без изменений
+proc getGender {unit} {
+	
+	# определяем список единиц женского рода и список простых родов
+	set femaleUnits { female unit_mile unit_mph thousand integer tenth hundredth minute }
+	set genders {male female neuter}
+	
+	# для винительного падежа или рода возвращаем без изменения
+	if { [string match "*_range" $unit] || ($unit in $genders) } {
+		return $unit
+	} 
+	
+	# для единиц измерения формируем род (мужской или женский)
+	if { $unit in $femaleUnits } {
+		return "female"
+	} else {
+		return  "male"
+	}
+}
+
+# для аргументов с префиксом "unit_" возвращает "MetarInfo", для остальных - "Default"
+proc getModuleName {unit} {
+	# puts "DEBUG: getGender: Получен аргумент $unit"
+	if {[string match "unit_*" $unit] } {
+		set result "MetarInfo"
+	} elseif {[string match "*Hz" $unit] } {
+		set result "Core"
+	} else {
+		set result "Default"
+	}
+	return $result
+}
+
+
+proc getNumeral {value} {
+	# удаляем минус
+	set value [expr {abs($value)}]
+	
+	# если есть тысячи, проверить есть ли единицы/десятки/сотни.
+	# если есть, считаем по ним, если только тысячи, считаем по тысячам
+	if {$value >= 1000} {
+		# Разделяем число на тысячи и остаток
+		set thousands [expr {$value / 1000}]
+		set remainder [expr {$value % 1000}]
+
+		if {$remainder == 0} {
+			# Если остаток равен нулю, возвращаем только количество тысяч
+			set value $thousands
+		} else {
+			# Если остаток не равен нулю, возвращаем только остаток
+			set value $remainder
+		}
+	}
+	
+	# убеждаемся что получилось меньше тысячи
+	if { $value >= 1000 } {
+		puts "ERROR*** getNumeral получил недопустимое число ($value)"
+		# Прерываем выполнение
+		return
+	}
+
+	# приводим результат как число от 0 до 19
+	# для дробных чисел используем количество сотых долей
+	set integerPart [expr {int($value)}]
+	set fractial [expr {$value - $integerPart}]
+	if { $fractial != 0 } {
+		set value [expr {int($fractial*100)}]
+	}	
+	set tens [expr {$value % 100}]
+	return [expr {$tens > 19 ? $tens % 10 : $tens}]	
+}
+
+# для именительного падежа женский род применяется для чисел заканчивается на "1" или "2"
+# для винительного падежа женский род применяется только для чисел заканчивающихся на "1"
+proc getNumberSuffix {quantity unit} {
+	
+	# приводим количество к диапазону 0-19
+	set quantity [getNumeral $quantity]
+	# получаем род именного сочетания
+	set gender [getGender $unit]
+	set mainUnit [string map {"_range" ""} $unit]
+	set mainGender [getGender $mainUnit]
+	
+	# для винительного падежа женский род применяется только для чисел заканчивающихся на "1"
+	if { [string match "*_range" $gender] } {
+		# puts "\nDEBUG getNumberSuffix: quantity=$quantity gender=$gender mainGender=$mainGender"
+		if { ($quantity ==1) && [string match "female*" $mainGender]  } {
+			# это единица женского рода
+			return "fs"
+		} else {
+			return "s"
+		}
+	}
+	
+	# для среднего рода 
+	if { $quantity ==1  && [string match "neuter" $gender] } {
+		return "o"
+	}
+
+	# для женского рода, если заканчивается на "1" или "2"
+	if { ($quantity == 1 || $quantity == 2) && [string match "female*" $gender] } {
+		return "f"
+	}
+	
+	# для остального - мужской род именительного падежа
+	return ""
+
+}
+
+# определяем склонение единицы измерения или именной части количественно-именного сочетания
+proc getUnitSuffix {unit quantity} {
+
+	# эти всегда склоняются в единственном или множественном числе
+	set numeralUnits { integer integer_range tenth tenth_range hundredth hundredth_range minute_range hour_range} 
+	set quantity [getNumeral $quantity]
+		
+	# всегда склоняются в единственном или множественном числе
+	if {$unit in $numeralUnits } {		
+		if { [string match "*_range" $unit] } {
+			# винительного падежа
+			if {$quantity == 1} {
+				# единственной формы
+				return "2"
+			} else {
+				# множественной формы
+				return "1"
+			}
+		} else {
+			# именительного падежа
+			if {$quantity == 1} {
+				# единственной формы
+				return ""
+			} else {
+				# множественной формы для остальных
+				return "1"
+			}
+		}	
+	}
+
+	# винительный падеж для числовых единиц, склоняемых в зависимости от количества в именительном падеже
+	if { [string match "*_range" $unit] } {
+		if {$quantity == 1} {
+			return "1"
+		} else {
+			# это множественная форма -> 1
+			return "2"
+		}
+	}
+	
+	# остальное (склоняется в зависимости от количества 1, 2-4, 5-19) 
+	if {$quantity == 1} {
+		return ""
+	} elseif {$quantity >= 2 && $quantity <= 4} {
+		return "1"
+	} else {
+		return "2"
+	}
+}
+# locale.tcl
+proc playTime {hour minute} {
+	# после отладки не забыть переменную CFG_TIME_FORMAT
+	variable Logic::CFG_TIME_FORMAT
 	if {[info exists Logic::CFG_TIME_FORMAT]} {
 		# Установить формат часа и время суток для 12-часового формата
 		if {$CFG_TIME_FORMAT == 12} {
@@ -24,188 +421,39 @@ proc playTime {hour minute} {
 		}	
 	}
 
+	# удалить лидирующе нули
+	set hours [string trimleft $hours "0"]
+	set minutes [string trimleft $minutes "0"]
 	
+	playNumberUnit $hour "hour"
+	playUnit "hour" $hour
 
-	playNumberRu $hour "male";
-	playUnit "Default" $hour "hour";
-	if {$minute != 0} {
-		playNumberRu $minute "female";
-		playUnit "Default" $minute "minute";
+	if { $minute > 0 } {
+		playNumberUnit $minute "minute"
+		playUnit "minute" $minute
 	} else {
 		playMsg "Default" "equal"
 	}
-	if {[info exists Logic::CFG_TIME_FORMAT]} {
-		# Добавление am/pm для 12-часового формата
-		if {$CFG_TIME_FORMAT == 12} {
-			playMsg "Core" "$ampm"
-		}	
-	}
 	
-}
-
-
-# Процедура для обработки числа (0-999)
-proc playNumberBlock { number gender } {
-	set num [expr {int($number)}]
-	set values {900 800 700 600 500 400 300 200 100 90 80 70 60 50 40 30 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1}
-
-	foreach val $values {
-		while {$num >= $val} {
-			# Обработка десятков 20-90, которые заканчиваются на 0
-			if {$val >= 20 && $val <= 90 && $val % 10 == 0} {
-				set remainder_after [expr {$num - $val}]
-				if {$remainder_after > 0} {
-					set tens [expr {$val / 10}]
-					set block "${tens}X"
-					playMsg "Default" $block
-					set num [expr {$num - $val}]
-					continue
-				} else {
-					playMsg "Default" $val
-					set num [expr {$num - $val}]
-					continue
-				}
-			}
-
-			# Стандартная обработка для остальных значений
-			set block $val
-			# Обработка чисел 1 и 2 в зависимости от рода
-			if {$val == 1 || $val == 2} {
-				# Женский род: добавляем суффикс "f"
-				if {$gender eq "female"} {
-					append block "f"
-				}
-				# Средний род: добавляем суффикс "o" только для числа 1, исключая числа, оканчивающиеся на 11
-				if {$gender eq "neuter" && $val == 1} {
-					set lastTwoDigits [expr {$num % 100}]
-					if {$lastTwoDigits != 11} {
-						append block "o"
-					}
-				}
-			}
-			playMsg "Default" $block
-			set num [expr {$num - $val}]
-		}
+	if { $CFG_TIME_FORMAT == 12} {
+		playMsg "Core" "$ampm"
 	}
 }
 
-
-# Процедура для добавления единицы измерения
-proc playUnit {modulename value unit} {
-	# Удаляем ведущие нули, чтобы избежать интерпретации как восьмеричного числа
-	set value [string trimleft $value "0"]
-	if {$value eq ""} {
-		set value 0
-	}
-
-	# Разрешаем как целые, так и дробные числа
-	if {![string is double -strict $value]} {
-		puts "***ERROR: Недопустимое значение: $value не является числом"
-	}
-
-	# Извлекаем целую часть для определения формы единицы измерения
-	set intValue [expr {int($value)}]
-
-	set lastDigit [expr {$intValue % 10}]
-	set lastTwo [expr {$intValue % 100}]
-
-	# Определение правильной формы единицы измерения
-	if {$lastTwo >= 11 && $lastTwo <= 14} {
-		# Для чисел 11-14 используется форма множественного числа
-		set unit "${unit}s"
-	} else {
-		switch -- $lastDigit {
-			1 { set unit "${unit}" }
-			2 - 3 - 4 { set unit "${unit}1" }
-			default { set unit "${unit}s" }
-		}
-	}
-
-	# Воспроизведение единицы измерения
-	playMsg $modulename $unit
-}
-
-
-# Процедура для воспроизведения числа на русском языке
-proc playNumberRu { value gender } {
-	# Разделение числа на целую и дробную части
-	set parts [split $value "."]
-	set integerPart [lindex $parts 0]
-	set fractionalPart [lindex $parts 1]
-
-	# Преобразование целой части в число
-	set integerPart [scan $integerPart %d]
-
-	# Обработка отрицательных чисел
-	set isNegative [expr {$value < 0}]
-	if {$isNegative} {
-		playMsg "Default" "minus"
-	}
-	set absValue [expr {abs($integerPart)}]
-
-	# Проверка на ноль
-	if {$absValue == 0 && ($fractionalPart eq "" || $fractionalPart == 0)} {
-		playMsg "Default" "0"
-		return
-	}
-
-	# Разделение целой части на тысячи и единицы
-	set thousands [expr {$absValue / 1000}]
-	set units [expr {$absValue % 1000}]
-
-	# Обработка тысяч
-	if {$thousands > 0} {
-		playNumberBlock $thousands "female"  
-		# Тысячи всегда женского рода
-		playUnit "Default" $thousands "thousand"
-	}
-
-	# Обработка единиц
-	if {$units > 0 || ($thousands == 0 && ($fractionalPart eq "" || $fractionalPart == 0))} {
-		# Если есть дробная часть, род целой части должен быть женским
-		if {$fractionalPart ne "" && $fractionalPart != 0} {
-			playNumberBlock $units "female"  
-			# Женский род для целой части
-		} else {
-			playNumberBlock $units $gender  
-			# Общий род для целых чисел
-		}
-
-		if {$fractionalPart ne "" && $fractionalPart != 0} {
-			playUnit "Default" $units "integer"  
-			# "целых"
-		}
-	}
-
-	# Обработка дробной части
-	if {$fractionalPart ne "" && $fractionalPart != 0} {
-		# Для дробных чисел с нулевой целой частью
-		if {$integerPart == 0} {
-			playMsg "Default" "0"
-			playUnit "Default" $integerPart "integer"
-		}
-
-		playMsg "Default" "and"
-		set fractionalNum [scan $fractionalPart "%d"]
-		set lastDigit [expr {$fractionalNum % 10}]
-		if {$lastDigit == 1 || $lastDigit == 2} {
-			playNumberBlock $fractionalNum "female"  
-			# Женский род для дробной части
-		} else {
-			playNumberBlock $fractionalNum $gender  
-			# Общий род для дробной части
-		}
-
-		if {[string length $fractionalPart] == 1} {
-			playUnit "Default" $fractionalNum "tenth"  
-			# "десятых"
-		} else {
-			playUnit "Default" $fractionalNum "hundredth"  
-			# "сотых"
-		}
-	}
-}
-
-proc putText { text } {
-	
+proc playFrequency {fq} {
+  if {$fq < 1000} {
+    set unit "Hz"
+  } elseif {$fq < 1000000} {
+    set fq [expr {$fq / 1000.0}]
+    set unit "kHz"
+  } elseif {$fq < 1000000000} {
+    set fq [expr {$fq / 1000000.0}]
+    set unit "MHz"
+  } else {
+    set fq [expr {$fq / 1000000000.0}]
+    set unit "GHz"
+  }
+  set ffq [string trimright [format "%.3f" $fq] ".0"]
+  playNumberUnit $ffq $unit
+  playUnit $unit $ffq
 }

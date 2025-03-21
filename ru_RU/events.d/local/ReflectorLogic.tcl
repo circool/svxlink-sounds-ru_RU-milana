@@ -32,12 +32,12 @@ namespace eval ReflectorLogic {
       foreach group $groups {
         # Лидирующие нули отправляем по одному
         while {[string index $group 0] eq "0"} {
-          playNumberRu 0 "male"
+          playNumberUnit 0 "male"
           set group [string range $group 1 end]
         }
         # Если в группе остались символы, отправляем их
         if {$group ne ""} {
-          playNumberRu $group "male"
+          playNumberUnit $group "male"
         }
         # Добавляем паузу, если это не последняя группа
         if {$group != [lindex $groups end]} {

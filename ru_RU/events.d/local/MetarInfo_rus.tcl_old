@@ -2,36 +2,51 @@
 # aka circool
 # aka R2ADU
 
+# *** ERROR: Unable to handle event: MetarInfo::metar "UUDD 181430Z 26003MPS 200V290 CAVOK 01/M14 Q1015 R32L/190050 NOSIG" in logic SimplexLogic (invalid command name "MetarInfo::metar")
+
+# *** ERROR: Unable to handle event: MetarInfo::say cavok in logic SimplexLogic (invalid command name "MetarInfo::say")
+# qnh: 1015
+
+# *** ERROR: Unable to handle event: MetarInfo::trend nosig in logic SimplexLogic (invalid command name "MetarInfo::trend")
+
+# *** ERROR: Unable to handle event: MetarInfo::metar "" in logic SimplexLogic (invalid command name "MetarInfo::metar")
+
 
 # MetarInfo
 namespace eval MetarInfo {
+
+  set module_name [namespace tail [namespace current]];
 
   proc activating_module {} {
     # variable module_name;
     # Module::activating_module $module_name;
   }
 
+  proc playMsg {msg} {
+    variable module_name;
+    ::playMsg $module_name $msg;
+  }
 
   # Это "перегруженная" форма вызова playUnit которая использует текущее простаранство имен как первый параметр,
   # позволяя упростить вызов из текущего пространства, не указывая модуль из которого она вызывается
   #
-  proc playUnit {value unit} {
-    variable module_name;
-    ::playUnit $module_name $value $unit;
-  }
+  # proc playUnit {value unit} {
+  #   variable module_name;
+  #   ::playUnit $module_name $value $unit;
+  # }
 
   # Процедура определения рода для единицы измерения
-  proc getGender { unit } {
-    # Проверяем единицы женского рода
-    if {$unit eq "unit_mile"} {
-      return "female"
-    } elseif {$unit eq "unit_mph"} {
-      return "female"
-    }
+  # proc getGender { unit } {
+  #   # Проверяем единицы женского рода
+  #   if {$unit eq "unit_mile"} {
+  #     return "female"
+  #   } elseif {$unit eq "unit_mph"} {
+  #     return "female"
+  #   }
 
-    # Все остальные случаи - мужской род
-    return "male"
-  }
+  #   # Все остальные случаи - мужской род
+  #   return "male"
+  # }
 
 
   # Обрабатывает строки с несколькими значениями, например пара значение-единица измерения
@@ -61,7 +76,7 @@ namespace eval MetarInfo {
             set gender "male"
           }
 
-          playNumberRu $val $gender
+          playNumberUnit $val $gender
 
           # Для слов выражающих единицу измерения
           if {[string match "unit_*" $unit]} {
@@ -76,7 +91,7 @@ namespace eval MetarInfo {
           }
           incr i
         } else {
-          playNumberRu $val "male"
+          playNumberUnit $val "male"
         }
       } else {
         # Обработка нечисловых значений
@@ -88,28 +103,28 @@ namespace eval MetarInfo {
   }
 
   # Выделение из строки выражений [.._от] ... до ... [unit_единицы]
-  proc split_string {input} {
+  # proc split_string {input} {
 
-    set pattern {([a-z]+_from\s\d+\s*to\s*\d+\s*unit_[a-z]+)}
+  #   set pattern {([a-z]+_from\s\d+\s*to\s*\d+\s*unit_[a-z]+)}
 
-    # Разбиваем строку на части
-    set result [regexp -all -inline $pattern $input]
-    puts "Результат разбивки: $result"
-    # Если найдено совпадение
-    if {[llength $result] > 0} {
-      # Получаем основной блок
-      set main_block [lindex $result 0]
+  #   # Разбиваем строку на части
+  #   set result [regexp -all -inline $pattern $input]
+  #   puts "Результат разбивки: $result"
+  #   # Если найдено совпадение
+  #   if {[llength $result] > 0} {
+  #     # Получаем основной блок
+  #     set main_block [lindex $result 0]
 
-      # Получаем текст до и после основного блока
-      set before [string range $input 0 [expr {[string first $main_block $input] - 1}]]
-      set after [string range $input [expr {[string first $main_block $input] + [string length $main_block]}] end]
+  #     # Получаем текст до и после основного блока
+  #     set before [string range $input 0 [expr {[string first $main_block $input] - 1}]]
+  #     set after [string range $input [expr {[string first $main_block $input] + [string length $main_block]}] end]
 
-      # Возвращаем результат в виде списка
-      return [list $before $main_block $after]
-    } else {
-      return {}
-    }
-  }
+  #     # Возвращаем результат в виде списка
+  #     return [list $before $main_block $after]
+  #   } else {
+  #     return {}
+  #   }
+  # }
 
 
   # Для улучшения восприятия для ходовых фраз подготовлены фразы вместо коипоновки отдельных слов
@@ -168,12 +183,15 @@ namespace eval MetarInfo {
       playMsg "not"
       playMsg "reported"
     } else {
-      if { int($temp) < 0} {
-        playMsg "minus";
-        set temp [string trimleft $temp "-"];
-      }
-      playNumberRu $temp "male"
-      playUnit $temp "unit_degree"
+      # if { int($temp) < 0} {
+      #   playMsg "minus";
+      #   set temp [string trimleft $temp "-"];
+      # }
+      # playNumberUnit $temp "male"
+      # playUnit $temp "unit_degree"
+      
+      playNumberUnit $temp "unit_degree_range"
+		  playUnit "unit_degree_range" $temp
     }
     playSilence 200
   }
@@ -188,8 +206,10 @@ namespace eval MetarInfo {
       playMsg "not"
       playMsg "reported"
     } else {
-      playNumberRu $dewpt "male"
-      playUnit $dewpt "unit_degree"
+      # playNumberUnit $dewpt "male"
+      # playUnit $dewpt "unit_degree"
+      playNumberUnit $dewpt "unit_degree_range"
+		  playUnit "unit_degree_range" $dewpt
     }
     playSilence 200
   }
@@ -199,8 +219,10 @@ namespace eval MetarInfo {
   proc slp {slp} {
     # puts "slp: $slp"
     playMsg "slp"
-    playNumberRu $slp "male"
-    playUnit $slp "unit_hPa"
+    # playNumberUnit $slp "male"
+    # playUnit $slp "unit_hPa"
+    playNumberUnit $slp "unit_hPa"
+    playUnit "unit_hPa_range" $slp
     playSilence 200
   }
 
@@ -208,7 +230,8 @@ namespace eval MetarInfo {
   proc flightlevel {level} {
     # puts "flightlevel: $level"
     playMsg "flightlevel"
-    playNumberRu $level "male"
+    # playNumberUnit $level "male"
+    playNumberUnit $level "male"
     playSilence 200
   }
 
@@ -221,7 +244,8 @@ namespace eval MetarInfo {
     # puts "peakwind: $val"
     playMsg "pk_wnd";
     playSilence 100;
-    playNumberRu $val "male";
+    # playNumberUnit $val "male";
+    playNumberUnit $val "male";
     playSilence 200;
   }
 
@@ -238,24 +262,33 @@ namespace eval MetarInfo {
     } elseif {$deg == "variable"} {
       playMsg "variable"
       playSilence 200
-      playNumberRu $vel "male"
-      playUnit $vel $unit
+      # playNumberUnit $vel "male"
+      # playUnit $vel $unit
+      playNumberUnit $vel "${unit}_range"
+      playUnit "${unit}_range" $vel
+
     } else {
       # ветер ... м/сек на ... градусов
-      playNumberRu $vel "male"
-      playUnit $vel $unit
+      
+      # playNumberUnit $vel "male"
+      # playUnit $vel $unit
+      playNumberUnit $vel "${unit}_range"
       playSilence 100
 
       playMsg "at"
       playSilence 100
-      playNumberRu $deg "male"
-      playUnit $deg "unit_degree"
+      # playNumberUnit $deg "male"
+      # playUnit $deg "unit_degree"
+      playNumberUnit $deg "unit_degree_range"
+      playUnit "unit_degree_range" $deg
       playSilence 100
 
       if {$gusts > 0} {
         playMsg "gusts_up"
-        playNumberRu $gusts "male"
-        playUnit $gusts $gvel
+        # playNumberUnit $gusts "male"
+        # playUnit $gusts $gvel
+        playNumberUnit $gusts "${gvel}_range"
+        playUnit "${gvel}_range" $gusts
       }
     }
     playSilence 200
@@ -277,12 +310,21 @@ namespace eval MetarInfo {
     playSilence 50
     playMsg "varies_from"
     playSilence 100
-    playNumberRu $from "male"
+    # playNumberUnit $from "male"
+    # playUnit $from "unit_degree"
+    # playNumberUnit $from "male_range"
+    playNumberUnit $from "unit_degree_range"
+    
+
     playSilence 100
     playMsg "to"
     playSilence 100
-    playNumberRu $to "male"
-    playUnit $to "unit_degree"
+    # playNumberUnit $to "male"
+    # playUnit $to "unit_degree"
+    # playNumberUnit $to "unit_degree_range"
+    playNumberUnit $to "unit_degree_range"
+    playUnit "unit_degree_range" $to
+
     playSilence 200
   }
 
@@ -294,12 +336,12 @@ namespace eval MetarInfo {
     playMsg "pk_wnd"
     playMsg "from"
     playSilence 100
-    playNumberRu $deg "male"
-    playUnit $deg "unit_kt"
+    playNumberUnit $deg "unit_kt_range"
+    playUnit "unit_kt_range" $deg
     playSilence 100
 
-    playNumberRu $kts "male"
-    playUnit $kts "unit_kt"
+    playNumberUnit $kts "unit_kt_range"
+    playUnit "unit_kt_range" $kts 
     playSilence 100
 
     playMsg "at"
@@ -318,13 +360,20 @@ namespace eval MetarInfo {
     playMsg "varies_from"
     playSilence 100
     set from [expr {int($from) * 100}]
-    playNumberRu $from "male"
+    
+    # playNumberUnit $from "male"
+    # playNumberUnit $from "male_range"
+    playNumberUnit $from "unit_feet_range"
+    
     playSilence 100
     playMsg "to"
     playSilence 100
     set to [expr {int($to)*100}]
-    playNumberRu $to "male"
-    playUnit $to "unit_feet"
+    
+    # playNumberUnit $to "male"
+    playNumberUnit $to "unit_feet_range"
+    playUnit"unit_feet_range" $to 
+    
     playSilence 200
   }
 
@@ -345,8 +394,8 @@ namespace eval MetarInfo {
   # runway visual range
   # Несколько аргументов без анонса
   proc rvr args {
-    puts "rvr: $args"
-    handleMultiplyReports $args ""
+    puts "*** DEBUG пока не реализовано rvr: $args"
+    # handleMultiplyReports $args ""
   }
 
 
@@ -372,8 +421,9 @@ namespace eval MetarInfo {
     puts "ceiling: $param"
     playMsg "ca"
     playSilence 100
-    playNumberRu $param "male"
-    playUnit $param "unit_feet"
+    # playNumberUnit $param "male"
+    playNumberUnit $param "unit_feet"
+    playUnit "unit_feet" $param
     playSilence 200
   }
 
@@ -381,8 +431,8 @@ namespace eval MetarInfo {
   proc qnh {value} {
     puts "qnh: $value"
     playMsg "qnh"
-    playNumberRu $value "male"
-    playUnit $value "unit_hPa"
+    playNumberUnit $value "unit_hPa"
+    playUnit "unit_hPa" $value
     playSilence 200
   }
 
@@ -391,8 +441,8 @@ namespace eval MetarInfo {
     puts "altimeter: $value"
     playMsg "altimeter"
     playSilence 100
-    playNumberRu $value "male"
-    playUnit $value "unit_inch"
+    playNumberUnit $value "unit_inch"
+    playUnit "unit_inch" $value
     playSilence 200
   }
 
@@ -403,8 +453,8 @@ namespace eval MetarInfo {
     # puts "clouds: $obs $height $cbs"
     playMsg $obs
     playSilence 100
-    playNumberRu $height "male"
-    playUnit $height "unit_feet"
+    playNumberUnit $height "unit_feet"
+    playUnit "unit_feet" $height
     if {[string length $cbs] > 0} {
       playMsg $cbs
     }
@@ -423,8 +473,8 @@ namespace eval MetarInfo {
     playSilence 50
     playMsg "daytime_temperature"
     playSilence 150
-    playNumberRu $deg "male"
-    playUnit $deg "unit_degree"
+    playNumberUnit $deg "unit_degree"
+    playUnit "unit_degree" $deg
     playSilence 150
     playMsg "at"
     playSilence 50
@@ -443,9 +493,9 @@ namespace eval MetarInfo {
     playSilence 50
     playMsg "daytime_temperature"
     playSilence 150
-    playNumberRu $deg "male"
-    playUnit $deg "unit_degree"
-    # speakNumber $deg "unit_degree"
+    playNumberUnit $deg "unit_degree"
+    playUnit "unit_degree" $deg
+    
     playSilence 150
     playMsg "at"
     playSilence 50
@@ -461,11 +511,11 @@ namespace eval MetarInfo {
     playMsg "maximal"
     playMsg "temperature"
     playMsg "last"
-    playNumberRu 6 "male"
-    playUnit 6 "hour"
+    playNumberUnit 6 "hour"
+    playUnit "hour" 6 
     playSilence 50
-    playNumberRu $val "male"
-    playUnit $val "unit_degree"
+    playNumberUnit $val "unit_degree"
+    playUnit  "unit_degree" $val
     playSilence 200
   }
 
@@ -475,11 +525,11 @@ namespace eval MetarInfo {
     playMsg "minimal"
     playMsg "temperature"
     playMsg "last"
-    playNumberRu 6 "male"
-    playUnit 6 "hour"
+    playNumberUnit 6 "male"
+    playUnit "hour" 6
     playSilence 50
-    playNumberRu $val "male"
-    playUnit $val "unit_degree"
+    playNumberUnit $val "unit_degree"
+    playUnit "unit_degree" $val
     playSilence 200
   }
 
@@ -492,11 +542,11 @@ namespace eval MetarInfo {
     playMsg "pressure"
     playMsg "tendency"
     playMsg "next"
-    playNumberRu 3 "male"
-    playUnit 3 "hour"
+    playNumberUnit 3 "hour"
+    playUnit "hour" 3
     playSilence 50
-    playNumberRu $val "male"
-    playUnit $val "unit_mb"
+    playNumberUnit $val "unit_mb"
+    playUnit "unit_mb" $val
     playSilence 200
     handleMultiplyReports $args ""
   }
@@ -506,11 +556,11 @@ namespace eval MetarInfo {
     # puts "rmk_precipitation: $hour $val"
     playMsg "precipitation"
     playMsg "last"
-    playNumberRu $hour "male"
-    playUnit $hour "hour"
+    playNumberUnit $hour "hour"
+    playUnit  "hour" $hour
     playSilence 50
-    playNumberRu $val "male"
-    playUnit $val "unit_inch"
+    playNumberUnit $val "unit_inch"
+    playUnit "unit_inch" $val
     playSilence 200
   }
 
@@ -526,20 +576,20 @@ namespace eval MetarInfo {
     playMsg "daytime"
     playMsg "temperature"
     playMsg "maximum"
-    if { $max < 0} {
-      playMsg "minus";
-      set max [string trimleft $max "-"];
-    }
-    playNumberRu $min "male"
-    playUnit $min "unit_degree"
+    # if { $max < 0} {
+    #   playMsg "minus";
+    #   set max [string trimleft $max "-"];
+    # }
+    playNumberUnit $min "unit_degree"
+    playUnit "unit_degree" $min
 
     playMsg "minimum"
-    if { $max < 0} {
-      playMsg "minus";
-      set max [string trimleft $max "-"];
-    }
-    playNumberRu $max "male"
-    playUnit $max "unit_degree"
+    # if { $max < 0} {
+    #   playMsg "minus";
+    #   set max [string trimleft $max "-"];
+    # }
+    playNumberUnit $max "unit_degree"
+    playUnit "unit_degree" $max
     playSilence 200
   }
 
@@ -547,13 +597,13 @@ namespace eval MetarInfo {
   proc rmk_tempdew {temp dewpt} {
     playMsg "re"
     playMsg "temperature"
-    playNumberRu $temp "male"
-    playUnit $temp "unit_degree"
+    playNumberUnit $temp "unit_degree"
+    playUnit "unit_degree" $temp
     playSilence 200
 
     playMsg "dewpoint"
-    playNumberRu $dewpt "male"
-    playUnit $dewpt "unit_degree"
+    playNumberUnit $dewpt "unit_degree"
+    playUnit"unit_degree" $dewpt 
     playSilence 200
   }
 
@@ -563,7 +613,7 @@ namespace eval MetarInfo {
     playSilence 100;
     playMsg "at";
     playSilence 100;
-    playNumberRu $val "male";
+    playNumberUnit $val "male";
     playSilence 200;
   }
 
@@ -571,8 +621,8 @@ namespace eval MetarInfo {
   # QFE value
   proc qfe {val} {
     playMsg "qfe"
-    playNumberRu $val "male"
-    playUnit $val "unit_hPa"
+    playNumberUnit $val "unit_hPa"
+    playUnit "unit_hPa" $val
     playSilence 200
   }
 

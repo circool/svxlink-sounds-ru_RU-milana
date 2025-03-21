@@ -58,6 +58,7 @@ proc readFile {filePath} {
 # Функция для сохранения словаря в файл
 proc saveWordMap {wordMap outputFile} {
 	set f [open $outputFile w]
+	puts $f "global wordMap"
 	puts $f "set wordMap \{"
 	dict for {dirName files} $wordMap {
 		puts $f "    \"$dirName\" \{"

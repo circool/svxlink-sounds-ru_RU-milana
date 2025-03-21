@@ -2,6 +2,10 @@
 # aka circool
 # aka R2ADU
 
+# Запускается процедура ручной идентификации
+# *** ERROR: Unable to handle event: SimplexLogic::manual_identification in logic SimplexLogic (invalid command name "spellWord")
+
+
 
 # Logic
 namespace eval Logic {
@@ -42,8 +46,8 @@ namespace eval Logic {
 		regexp {([1-5]?\d)$} [clock format $epoch -format "%M"] -> minute;
 		set prev_ident $epoch;
 
-		playMsg "Core" "online_short";
-		spellWord $mycall;
+		# playMsg "Core" "online_short";
+		# spellWord $mycall;
 		if {$CFG_TYPE == "Repeater"} {
 			playMsg "Core" "repeater";
 		}
@@ -55,7 +59,7 @@ namespace eval Logic {
 
 		if {$report_ctcss > 0} {
 			playMsg "Core" "pl_is";
-			playFrequencyRu $report_ctcss
+			playFrequency $report_ctcss
 			playSilence 300;
 		}
 		
@@ -89,36 +93,7 @@ namespace eval Logic {
 		}
 	}
 
-	proc playFrequencyRu {fq} {
-
-		if {$fq < 1000} {
-			set unit "Hz"
-		} elseif {$fq < 1000000} {
-			set fq [expr {$fq / 1000.0}]
-			set unit "kHz"
-		} elseif {$fq < 1000000000} {
-			set fq [expr {$fq / 1000000.0}]
-			set unit "MHz"
-		} else {
-			set fq [expr {$fq / 1000000000.0}]
-			set unit "GHz"
-		}
-
-		# Форматируем число с тремя знаками после запятой
-		set formattedFq [format "%.3f" $fq]
-
-		# Убираем лишние нули и точку
-		set trimmedFq [string trimright $formattedFq ".0"]
-
-		# Проверка, что значение является числом
-		if {![string is double $trimmedFq]} {
-			error "Invalid value: $trimmedFq is not a number"
-		}
-
-		# Произносим число и единицу измерения
-		playNumberRu $trimmedFq "female"
-		playUnit "Default" $trimmedFq $unit
-	}
+	
 	
 
 }

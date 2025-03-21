@@ -12,18 +12,18 @@ proc runTest { args expected } {
     # puts "Тестируем фразу: $args"
 
     # Форматируем строку с ожидаемым результатом
-    set expectedLabel "Ожидаемый результат:  "
-    set expectedFormatted [format "%-20s %s" $expectedLabel $expected]
+    # set expectedLabel "Ожидаемый результат:  "
+    # set expectedFormatted [format "%-20s %s" $expectedLabel $expected]
 
     # Запускаем runTests.tcl и захватываем его вывод
-    set result [exec ../runTests.tcl {*}$args]
+    set result [exec ./runTests.tcl {*}$args]
 
     # Удаляем пробелы в конце результата
     set result [string trimright $result]
-
+    set expected [string trimright $expected]
     # Форматируем строку с фактическим результатом
-    set resultLabel "Фактический результат:"
-    set resultFormatted [format "%-20s %s" $resultLabel $result]
+    # set resultLabel "Фактический результат:"
+    # set resultFormatted [format "%-20s %s" $resultLabel $result]
 
     # Сравниваем ожидаемый и фактический результат
     if {$result eq $expected} {
@@ -45,8 +45,8 @@ set testFailed 0
 
 # Процедура для запуска тестов из файла
 proc runTestsFromFile {file} {
+    
     global debugMode
-    # Указываем, что testFailed — глобальная переменная
     global testFailed
 
     # Локальная переменная для отслеживания ошибок в текущем файле
@@ -121,10 +121,6 @@ if { $debugMode } {
 
     
 }
-
-
-
-
 
 
 # Итоговое сообщение
