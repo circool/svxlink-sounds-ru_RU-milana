@@ -94,7 +94,7 @@ if { $debugMode } {
     set file "num_test_data.tcl"
     puts -nonewline "\nОбрабатываю файл $file. "
     runTestsFromFile $file
-
+    
     set file "num_test_female_data.tcl"
     puts -nonewline "\nОбрабатываю файл $file. "
     runTestsFromFile $file
@@ -106,6 +106,10 @@ if { $debugMode } {
     set file "time_test_data.tcl"
     puts -nonewline "\nОбрабатываю файл $file. "
     runTestsFromFile $file
+
+    # set file "time12_test_data.tcl"
+    # puts -nonewline "\nОбрабатываю файл $file. "
+    # runTestsFromFile $file
 
     set file "numbers_with_unit_test_data.tcl"
     puts -nonewline "\nОбрабатываю файл $file. "

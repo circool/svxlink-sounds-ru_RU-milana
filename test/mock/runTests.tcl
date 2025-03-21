@@ -1,14 +1,30 @@
 #!/usr/bin/env tclsh
-
-# Загрузка библиотек
-source "../locale.tcl"
-source "../MetarInfo.tcl"
-
-namespace import MetarInfo::temperature
-
-
 # Процедура для анализа аргументов и вызова соответствующей процедуры
 proc runTests {args} {
+	namespace eval MetarInfo {
+		# Объявляем переменную CFG_ID
+		variable CFG_ID
+		set CFG_ID "5";  
+
+		# Проверка наличия CFG_ID
+		if {![info exists CFG_ID]} {
+			puts "*** ERROR CFG_ID не объявлена в runTest"
+			return
+		}
+	}
+	namespace eval Logic {
+		variable CFG_TIME_FORMAT
+		if {![info exists CFG_TIME_FORMAT]} {
+			set CFG_TIME_FORMAT 24
+		}
+	}
+	
+    
+	
+	# Загрузка библиотек
+	source "../locale.tcl"
+	source "../Logic.tcl"
+	source "../MetarInfo.tcl"
 	global argv
 	set argc [llength $args]
 	set arg1 [lindex $args 0]
@@ -24,17 +40,10 @@ proc runTests {args} {
     }
 
 
-
-
-
-
-
-
-
 	# перечень единиц измерения и родов
 	set validUnits { hour minute }
 	set validGenders { male female neuter male_range female_range neuter_range}
-	
+
 	
 
 	
@@ -52,7 +61,10 @@ proc runTests {args} {
 		set arg1 [lindex $args 0]
 		set arg2 [lindex $args 1]
 		
-		if { $arg2 in $validGenders} {
+		if {$arg1 == "spellNumber"} {
+			spellNumber $arg2
+		
+		} elseif { $arg2 in $validGenders} {
 			# второй аргумент - род
 			# puts "arg2 is gender"
 			playNumberUnit $arg1 $arg2;	
@@ -69,9 +81,10 @@ proc runTests {args} {
 		set arg2 [lindex $args 1]
 		set arg3 [lindex $args 2]
 		
-		if {$arg3 == 12 || $arg3 == 24} {
+		if {$arg1 == "playTime"} {
 			# если третий аргумент равен 12 или 24, вызываем playTime
-			playTime $arg1 $arg2 $arg3
+			playTime $arg2 $arg3
+		
 		} elseif { [string is double -strict $arg1]} {
 			# иначе вызываем playNumberUnit + playUnit 
 			playNumberUnit $arg1 $arg2

@@ -8,6 +8,9 @@ source [file join [file dirname [info script]] dict.tcl]
 
 
 # locale.tcl
+# CUT UP WHEN DEBUG IS DONE ============================================================== <<<
+
+
 # разбивает число на составляющие, которые могут быть представлены базовыми единицами в диапазоне от 0 до 999 для целых чисел 
 # или от 0 до 99 для дробных частей.
 # отправляет их в playNumbers по очереди как количественно-именное сочетание
@@ -415,44 +418,25 @@ proc getNumberSuffix {quantity unit} {
 }
 
 # locale.tcl
-proc playTime {hours minutes {timeformat 24}} {
-	# после отладки не забыть переменную CFG_TIME_FORMAT
-	# variable Logic::CFG_TIME_FORMAT
-	# if {[info exists Logic::CFG_TIME_FORMAT]} {
-	# 	# Установить формат часа и время суток для 12-часового формата
-	# 	if {$CFG_TIME_FORMAT == 12} {
-	# 		if {$hour == 0} {
-	# 			set hour 12
-	# 			set ampm "AM"
-	# 		} elseif {$hour < 12} {
-	# 			set ampm "AM"
-	# 		} else {
-	# 			if {$hour > 12} {
-	# 				set hour [expr {$hour - 12}]
-	# 			}
-	# 			set ampm "PM"
-	# 		}
-	# 	}	
-	# }
-
-	
-
-	if {$timeformat == 12} {
-		if {$hours == 0} {
-			set hours 12
-			set ampm "AM"
-		} elseif {$hours < 12} {
-			set ampm "AM"
-		} else {
-
-			if {$hours > 12} {
-				set hours [expr {$hours - 12}]
+proc playTime {hours minutes} {
+	variable Logic::CFG_TIME_FORMAT
+	if {[info exists Logic::CFG_TIME_FORMAT]} {
+		# Установить формат часа и время суток для 12-часового формата
+		if {$CFG_TIME_FORMAT == 12} {
+			if {$hours == 0} {
+				set hours 12
+				set ampm "AM"
+			} elseif {$hours < 12} {
+				set ampm "AM"
+			} else {
+				if {$hours > 12} {
+					set hours [expr {$hours - 12}]
+				}
+				set ampm "PM"
 			}
-			set ampm "PM"
-		}
-		
+		}	
 	}
-	
+
 
 	# set hours [string trimleft $hours "0"]
 	# set minutes [string trimleft $minutes "0"]
@@ -468,7 +452,7 @@ proc playTime {hours minutes {timeformat 24}} {
 		playMsg "Default" "equal"
 	}
 	
-	if {$timeformat == 12} {
+	if {$CFG_TIME_FORMAT == 12} {
 		playMsg "Core" "$ampm"
 	}
 }

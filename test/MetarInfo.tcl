@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh
 
-
+# CUT UP WHEN DEBUG IS DONE ============================================================== <<<
 ###############################################################################
 #
 # MetarInfo module event handlers
@@ -19,7 +19,8 @@ namespace eval MetarInfo {
 # Check if this module is loaded in the current logic core
 #
 if {![info exists CFG_ID]} {
-  # return;
+  # puts "*** ERROR CFG_ID не существует "
+  return;
 }
 
 
