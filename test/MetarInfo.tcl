@@ -204,6 +204,7 @@ proc visibility {args} {
             playMsg $arg
         }
     }
+    playSilence 200
 }
 
 
@@ -211,14 +212,14 @@ proc visibility {args} {
 # temperature +
 proc temperature {temp} {
   playMsg "temperature";
-  playSilence 100;
+  # playSilence 100;
   if {$temp == "not"} {
     playMsg "not";
     playMsg "reported";
   } else {
     playNumberUnit $temp "unit_degree";
     playUnit "unit_degree" $temp;
-    playSilence 100;
+    # playSilence 100;
   }
   playSilence 200;
 }
@@ -227,14 +228,14 @@ proc temperature {temp} {
 # dewpoint +
 proc dewpoint {dewpt} {
   playMsg "dewpoint";
-  playSilence 100;
+  # playSilence 100;
   if {$dewpt == "not"} {
     playMsg "not";
     playMsg "reported";
   } else {
     playNumberUnit $dewpt "unit_degree";
     playUnit "unit_degree" $dewpt;
-    playSilence 100;
+    # playSilence 100;
   }
   playSilence 200;
 }
@@ -268,7 +269,7 @@ proc nospeci {} {
 proc peakwind1 {val} {
   playMsg "pk_wnd";
   playSilence 100;
-  regsub {^0(\d)} $val {\1} val
+  regsub {^0+(\d+)} $val {\1} val
   playNumberUnit $val "male";
   playSilence 200;
 }
@@ -276,36 +277,42 @@ proc peakwind1 {val} {
 
 # wind
 proc wind {deg {vel 0 } {unit 0} {gusts 0} {gvel 0}} {
-
+  # puts "\nПолучено deg=$deg vel=$vel unit=$unit gusts=$gusts gvel=$gvel"
   playMsg "wind";
+  
   # удалить множественный признак для е/и кроме unit_mps
   if {$unit ne "unit_mps"} {
     set unit [string trimright $unit "s"]
     set gvel [string trimright $gvel "s"]
-    
   }
-  regsub {^0(\d)} $vel {\1} vel
+  
+  if {$vel > 0} {
+    regsub {^0+(\d+)} $vel {\1} vel
+  }
+
   if {$deg == "calm"} {
     playMsg "calm";
   } elseif {$deg == "variable"} {
     playMsg "variable";
-    playSilence 200;
-    
+    # playSilence 200;
     
     playNumberUnit $vel $unit;
     playUnit $unit $vel ;
   } else {
+    regsub {^0+(\d+)} $deg {\1} deg
     playNumberUnit $deg "unit_degree";
     playUnit "unit_degree" $deg;
     playSilence 100;
     playMsg "wspd";
-    playSilence 100;
+    # playSilence 100;
     playNumberUnit $vel $unit;
     playUnit $unit $vel ;
-    playSilence 100;
+    
 
     if {$gusts > 0} {
+      playSilence 100;
       playMsg "gusts_up";
+      regsub {^0+(\d+)} $gusts {\1} gusts
       playNumberUnit $gusts "${gvel}_range";
       playUnit "${gvel}_range" $gusts;
     }
@@ -332,13 +339,16 @@ proc windvaries {from to} {
    playMsg "wind";
    playSilence 50;
    playMsg "varies_from";
-   playSilence 100;
+   playSilence 50;
+   
+   regsub {^0+(\d+)} $from {\1} from
+   regsub {^0+(\d+)} $to {\1} to
 
    playNumberUnit $from "unit_degree_range";
-   playSilence 100;
+   playSilence 50;
 
    playMsg "to";
-   playSilence 100;
+   playSilence 50;
    playNumberUnit $to "unit_degree_range";
 
    playUnit "unit_degree" $to;
@@ -351,7 +361,7 @@ proc peakwind {deg kts hh mm} {
   playMsg "pk_wnd";
   # 
   #  playMsg "dir";
-   playSilence 100;
+  #  playSilence 100;
    playMsg "at";
    playNumberUnit $deg "unit_degree";
    playUnit "unit_degree" $deg;
@@ -502,15 +512,15 @@ proc trend args {
 
 # clouds with arguments
 proc clouds {obs height {cbs ""}} {
-  playMsg "clouds"
+  # playMsg "clouds"
   playMsg $obs;
   if {[string length $cbs] > 0} {
     playMsg $cbs;
   }
-  playSilence 100;
+  # playSilence 100;
   playMsg "altimeter"
   playNumberUnit $height "unit_feet";
-  playSilence 100;
+  #playSilence 100;
   playUnit "unit_feet" $height;
 
   
@@ -699,25 +709,17 @@ proc rmk_minmaxtemp {max min} {
 
 # recent temperature and dewpoint in RMK section
 proc rmk_tempdew {temp dewpt} {
-  playMsg "re";
-  playMsg "temperature";
-  # if { $temp < 0} {
-  #    playMsg "minus";
-  #    set temp [string trimleft $temp "-"];
-  # }
-
-  playNumberUnit $temp "unit_degree";
-  playMsg "unit_degree" $temp  ;
-  playSilence 200;
-  playMsg "dewpoint";
-  # if { $dewpt < 0} {
-  #    playMsg "minus";
-  #    set dewpt [string trimleft $dewpt "-"];
-  # }
-
-  playNumberUnit $dewpt "unit_degree";
-  playMsg "unit_degree" $dewpt;
   
+  playMsg "re";
+  
+  playMsg "temperature";
+  playNumberUnit $temp "unit_degree";
+  playUnit "unit_degree" $temp  ;
+  # playSilence 200;
+  # playMsg "and"
+  playMsg "dewpoint";
+  playNumberUnit $dewpt "unit_degree";
+  playUnit "unit_degree" $dewpt;
   playSilence 200;
 }
 
@@ -744,13 +746,21 @@ proc qfe {val} {
 }
 
 
+# Пример: runwaystate runway 06 center damp contamination 51 to 100 percent deposit_depth less_than 1 unit_mm  friction_coefficient 0.45
 
+# Начало пврвметров всегда (1-2- и возможно 3-й аргументы): runway 06 или runway 06 center
+# блок по паттерну "runway" "число" "[center|left|right]"
+# обрабатывать так:
+# playMsg "runway"
+# SpeelNumber "число"
+# Если есть [center|left|right] -> playMsg center|left|right -> перейти к 4-му параметру, если нет - к 3-му
+#
+# Последующие параметры:  
 # блоки по патерну  ("less_or_equal" или "less") "10" "percent"
 # обрабатывать так:
 # playMsg "less_or_equal" или "less"
 # playNumberUnit 10 "percent_range";
 # playUnit "percent_range" 10;
-
 
 # блоки по патерну "51" "to" "100" "percent"
 # обрабатывать так:
@@ -769,25 +779,123 @@ proc qfe {val} {
 # блоки до/после паттерна обрабатывать так:
 # если параметр это слово, вызывать playMsg
 # runwaystate
+# proc runwaystate args {
+    
+#     set len [llength $args]
+#     set i 0
+#     while {$i < $len} {
+#         set current [lindex $args $i]
+        
+#         # Паттерн ВВП \d\d
+#         if {[string match "runway" $current] && $i + 1 < $len} {
+#           set unit [lindex $args $i+1]
+#           playMsg "runway"
+#           spellNumber $unit
+#           incr i 3
+#         }
+
+
+#         # Паттерн 1: "less_or_equal"/"less" + число + ("unit_*" или "percent")
+#         if {[string match "less*" $current] && $i + 2 < $len} {
+#             set num [lindex $args $i+1]
+#             set unit [lindex $args $i+2]
+#             if {[string is integer -strict $num] && ($unit eq "percent" || [string match "unit_*" $unit])} {
+#                 # Генерация суффикса для единицы
+#                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent_range" : "${unit}_range"}]
+#                 # puts "DEBUG Паттерн 1: $current $num $unit → $unit_suffix"
+#                 playMsg $current
+#                 playNumberUnit $num $unit_suffix
+#                 playUnit $unit_suffix $num
+#                 incr i 3
+#                 playSilence 100
+#                 continue
+#             }
+#         }
+        
+#         # Паттерн 2: число + "to" + число + ("unit_*" или "percent")
+#         if {[string is integer -strict $current] && $i + 3 < $len} {
+#             set next1 [lindex $args $i+1]
+#             set next2 [lindex $args $i+2]
+#             set next3 [lindex $args $i+3]
+#             if {$next1 eq "to" && [string is integer -strict $next2] && ($next3 eq "percent" || [string match "unit_*" $next3])} {
+#                 playMsg "from"
+#                 # Генерация суффикса для единицы
+#                 set unit_suffix [expr {$next3 eq "percent" ? "unit_percent_range" : "${next3}_range"}]
+#                 # puts "DEBUG Паттерн 2: $current to $next2 $next3 → $unit_suffix"
+#                 playNumberUnit $current $unit_suffix
+#                 playMsg "to"
+#                 playNumberUnit $next2 $unit_suffix
+#                 playUnit $unit_suffix $next2
+#                 incr i 4
+#                 playSilence 100
+#                 continue
+#             }
+#         }
+        
+#         # Паттерн 3: число + ("unit_*" или "percent")
+#         if {[string is integer -strict $current] && $i + 1 < $len} {
+#             set unit [lindex $args $i+1]
+#             if {$unit eq "percent" || [string match "unit_*" $unit]} {
+#                 # Генерация суффикса для единицы
+#                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent" : $unit}]
+#                 # puts "DEBUG Паттерн 3: $current $unit → $unit_suffix"
+#                 playNumberUnit $current $unit_suffix
+#                 playUnit $unit_suffix $current
+#                 incr i 2
+#                 playSilence 100
+#                 continue
+#             }
+#         }
+        
+        
+#         # Одиночные элементы
+#         if {[string is double -strict $current] || [string is integer -strict $current]} {
+#             playNumberUnit $current "male"
+#         } else {
+#             playMsg $current
+#         }
+#         playSilence 100
+#         incr i
+#     }
+#     playSilence 200
+# }
+
+
 proc runwaystate args {
     set len [llength $args]
     set i 0
     while {$i < $len} {
         set current [lindex $args $i]
         
+        # Паттерн ВПП: "runway" + номер + [center|left|right]?
+        if {[string match "runway" $current] && $i + 1 < $len} {
+            set runway_number [lindex $args $i+1]
+            playMsg "runway"
+            spellNumber $runway_number
+            incr i 2
+            
+            # Проверяем, есть ли указание на center/left/right
+            if {$i < $len} {
+                set direction [lindex $args $i]
+                if {[string match "center" $direction] || [string match "left" $direction] || [string match "right" $direction]} {
+                    playMsg $direction
+                    incr i
+                }
+            }
+            continue
+        }
+
         # Паттерн 1: "less_or_equal"/"less" + число + ("unit_*" или "percent")
         if {[string match "less*" $current] && $i + 2 < $len} {
             set num [lindex $args $i+1]
             set unit [lindex $args $i+2]
             if {[string is integer -strict $num] && ($unit eq "percent" || [string match "unit_*" $unit])} {
-                # Генерация суффикса для единицы
                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent_range" : "${unit}_range"}]
-                # puts "DEBUG Паттерн 1: $current $num $unit → $unit_suffix"
+                
                 playMsg $current
                 playNumberUnit $num $unit_suffix
                 playUnit $unit_suffix $num
                 incr i 3
-                playSilence 100
                 continue
             }
         }
@@ -799,15 +907,12 @@ proc runwaystate args {
             set next3 [lindex $args $i+3]
             if {$next1 eq "to" && [string is integer -strict $next2] && ($next3 eq "percent" || [string match "unit_*" $next3])} {
                 playMsg "from"
-                # Генерация суффикса для единицы
                 set unit_suffix [expr {$next3 eq "percent" ? "unit_percent_range" : "${next3}_range"}]
-                # puts "DEBUG Паттерн 2: $current to $next2 $next3 → $unit_suffix"
                 playNumberUnit $current $unit_suffix
                 playMsg "to"
                 playNumberUnit $next2 $unit_suffix
                 playUnit $unit_suffix $next2
                 incr i 4
-                playSilence 100
                 continue
             }
         }
@@ -816,13 +921,10 @@ proc runwaystate args {
         if {[string is integer -strict $current] && $i + 1 < $len} {
             set unit [lindex $args $i+1]
             if {$unit eq "percent" || [string match "unit_*" $unit]} {
-                # Генерация суффикса для единицы
                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent" : $unit}]
-                # puts "DEBUG Паттерн 3: $current $unit → $unit_suffix"
                 playNumberUnit $current $unit_suffix
                 playUnit $unit_suffix $current
                 incr i 2
-                playSilence 100
                 continue
             }
         }
@@ -833,11 +935,20 @@ proc runwaystate args {
         } else {
             playMsg $current
         }
-        playSilence 100
         incr i
     }
     playSilence 200
 }
+
+
+
+
+
+
+
+
+
+
 # output numbers
 proc sayNumber { number } {
   variable ts;
@@ -918,7 +1029,6 @@ proc airports args {
   foreach item $args {
 
      # is a number??
-
      if {[regexp {(\d+)} $item tval]} {
        sayNumber $tval;
      } else {
@@ -944,8 +1054,8 @@ variable a 0;
     playMsg "cld_$msg";
     playMsg "covering";
     incr a;
-    playNumber [lindex $args $a];
-    playMsg "eighth";
+    playNumberUnit [lindex $args $a] "unit_eighth";
+    playUnit "unit_eighth" [lindex $args $a];
     incr a;
     playSilence 100;
   }

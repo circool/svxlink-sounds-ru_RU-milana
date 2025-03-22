@@ -281,8 +281,6 @@ proc getModuleName {unit} {
 	# puts "DEBUG: getGender: Получен аргумент $unit"
 	if {[string match "unit_*" $unit] } {
 		set result "MetarInfo"
-	} elseif {[string match "Hz" $unit] } {
-		set result "Core"	
 	} else {
 		set result "Default"
 	}
@@ -496,8 +494,27 @@ proc spellNumber {number} {
   }
 }
 
+proc playFrequency {fq} {
+  if {$fq < 1000} {
+    set unit "Hz"
+  } elseif {$fq < 1000000} {
+    set fq [expr {$fq / 1000.0}]
+    set unit "kHz"
+  } elseif {$fq < 1000000000} {
+    set fq [expr {$fq / 1000000.0}]
+    set unit "MHz"
+  } else {
+    set fq [expr {$fq / 1000000000.0}]
+    set unit "GHz"
+  }
+  set ffq [string trimright [format "%.3f" $fq] ".0"]
+  playNumberUnit $ffq $unit
+  playUnit $unit $ffq
+}
+
+
 proc playSilence {param} {
-	if {[info exists ::debugMode]} {
+	if {![info exists ::debugMode]} {
 		set value [expr {int($param)}]
 		if {$value < 200} {
 			puts -nonewline ", "
@@ -505,6 +522,7 @@ proc playSilence {param} {
 			puts "."
 		}
 	} else {
+		puts "DEBUG*** debugMode found"
 		return;
 	}
 	

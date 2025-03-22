@@ -34,6 +34,7 @@ proc runTests {args} {
     foreach ns $namespaces {
         if {[info proc ${ns}::$arg1] ne ""} {
             # Если процедура найдена, вызываем её с оставшимися аргументами
+			# puts "Call $ns $arg1 "
             ${ns}::$arg1 {*}[lrange $args 1 end]
             return
         }
