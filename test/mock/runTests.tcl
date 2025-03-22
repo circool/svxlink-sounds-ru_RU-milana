@@ -1,7 +1,12 @@
 #!/usr/bin/env tclsh
 # Процедура для анализа аргументов и вызова соответствующей процедуры
 proc runTests {args} {
-	
+	if {[info exists ::env(TEST_DEBUG_MODE)]} {
+        set debugMode $::env(TEST_DEBUG_MODE)
+    } else {
+        set debugMode 1
+    }
+
 	# Инициируем переменные и подключаем модули
 	global langdir
 	set langdir "../ru_RU"

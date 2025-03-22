@@ -125,10 +125,11 @@ proc no_such_airport {} {
 
 # METAR not valid
 proc metar_not_valid {} {
-  playMsg "metarinformation";
-  playMsg "not";
-  playMsg "valid";
-   playSilence 200;
+  # playMsg "metarinformation";
+  # playMsg "not";
+  # playMsg "valid";
+  playMsg "metar_not_valid"
+  playSilence 200;
 }
 
 
@@ -558,7 +559,7 @@ proc tempo_obscuration {from until} {
 proc max_daytemp {deg time} {
   playMsg "predicted";
   playSilence 50;
-  playMsg "maximal";
+  playMsg "maximalf";
   playSilence 50;
   playMsg "daytime_temperature";
   playSilence 150;
@@ -601,7 +602,7 @@ proc min_daytemp {deg time} {
 
 # Maximum temperature in RMK section
 proc rmk_maxtemp {val} {
-  playMsg "maximal";
+  playMsg "maximalf";
   playMsg "temperature";
   playMsg "for";
   playMsg "last1";
@@ -1074,8 +1075,9 @@ variable a 0;
     
     playMsg "covering";
     incr a;
-    playNumberUnit [lindex $args $a] "unit_eighth";
-    playUnit "unit_eighth" [lindex $args $a];
+    set qty [lindex $args $a] 
+    playNumberUnit $qty "unit_eighth";
+    playUnit "unit_eighth" $qty;
     incr a;
     playSilence 100;
   }

@@ -1,6 +1,9 @@
 #!/usr/bin/env tclsh
-
+global debugMode
 set ::debugMode 1
+# Устанавливаем переменную окружения
+set ::env(DEBUG_MODE) $debugMode    
+
 
 
 # Этот файл располагается в директории /test/mock

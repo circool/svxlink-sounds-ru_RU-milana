@@ -1,5 +1,5 @@
 #!/usr/bin/env tclsh
-global debugMode
+
 
 # Словарь для преобразования имен файлов в слова
 source [file join [file dirname [info script]] dict.tcl]
@@ -30,7 +30,15 @@ proc playMsg { modulename playingWord {warn 1}} {
 }
 
 proc playSilence {param} {
+	# return
+	# if {![info exists debugMode]} {
+	# 	puts "DEBUG*** debugMode not found"	
+	# }
+	
 	if {![info exists ::debugMode]} {
+		# puts "DEBUG*** ::debugMode not found"
+		# return;
+
 		set value [expr {int($param)}]
 		if {$value < 200} {
 			puts -nonewline ", "
@@ -38,12 +46,27 @@ proc playSilence {param} {
 			puts "."
 		}
 	} else {
-		puts "DEBUG*** debugMode found"
+		# puts "DEBUG*** ::debugMode found"
 		return;
 	}
 	
 }
 
+proc spellNumber {number} {
+  
+  for {set i 0} {$i < [string length $number]} {set i [expr $i + 1]} {
+    set ch [string index $number $i];
+    if {$ch == "."} {
+      playMsg "Default" "decimal"
+    } elseif {$ch == "+"} {
+      playMsg "Default" "plus"
+    } elseif {$ch == "-"} {
+      playMsg "Default" "minus"
+    } else {
+      playMsg "Default" "$ch";
+    }
+  }
+}
 # locale.tcl
 # CUT UP WHEN DEBUG IS DONE ============================================================== <<<
 
@@ -517,25 +540,6 @@ proc playTime {hours minutes} {
 	if {$CFG_TIME_FORMAT == 12} {
 		playMsg "Core" "$ampm"
 	}
-}
-
-
-
-
-proc spellNumber {number} {
-  
-  for {set i 0} {$i < [string length $number]} {set i [expr $i + 1]} {
-    set ch [string index $number $i];
-    if {$ch == "."} {
-      playMsg "Default" "decimal"
-    } elseif {$ch == "+"} {
-      playMsg "Default" "plus"
-    } elseif {$ch == "-"} {
-      playMsg "Default" "minus"
-    } else {
-      playMsg "Default" "$ch";
-    }
-  }
 }
 
 proc playFrequency {fq} {
