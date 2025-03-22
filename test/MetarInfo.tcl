@@ -145,11 +145,9 @@ proc metreport_time {item} {
    set part1 [string range $item 0 1]  
    set part2 [string range $item 2 3]  
    
-   # удаляем лидирующие нули
+   # удаляем лидирующие нули (но не более одного!)
    regsub {^0(\d)} $part1 {\1} part1
    regsub {^0(\d)} $part2 {\1} part2
-
-  #  puts "вызываю playTime $part1 $part2"
    playTime $part1 $part2;
    playSilence 200;
 }
@@ -173,25 +171,34 @@ proc visibility {args} {
     }
     playMsg "visibility"
     set suffix ""
+    
     for {set i 0} {$i < $argc} {incr i} {
         set arg [lindex $args $i]
         
+        # Если аргумент числовой
         if {[string is double -strict $arg]} {
-            # Если аргумент числовой
+            
+            # получаем следующий аргумент
             set next_arg [lindex $args [expr {$i + 1}]]
             
-            if {[string match "unit_*" $next_arg]} {
-                # Если следующий аргумент соответствует шаблону "unit_*"
+            # Если следующий аргумент соответствует шаблону "unit_*"
+            if {[string match "unit_*" $next_arg]} {               
                 
                 # для множественного числа удаляем признак ("s")
                 if {[string index $next_arg end] eq "s"} {
                     set next_arg [string range $next_arg 0 end-1]
                 }
-                regsub {^0(\d)} $arg {\1} arg 
+                # удалить лидирующие нули перед произношением чисел
+                # regsub {^0+(\d+)} $arg {\1} arg 
+                
                 playNumberUnit $arg "${next_arg}$suffix"
                 playUnit "${next_arg}$suffix" $arg
-                incr i  ; # Пропускаем следующий аргумент, так как он уже обработан
+                
+                # Пропускаем следующий аргумент, так как он уже обработан
+                incr i  ; 
+            
             } else {
+                
                 # Если следующий аргумент не соответствует шаблону или отсутствует
                 playNumberUnit $arg "male$suffix"
             }
@@ -268,7 +275,8 @@ proc nospeci {} {
 # peakwind
 proc peakwind1 {val} {
   playMsg "pk_wnd";
-  playSilence 100;
+  # playSilence 100;
+  # удаляем лидирующие нули поскольку передаем число без указания единиц
   regsub {^0+(\d+)} $val {\1} val
   playNumberUnit $val "male";
   playSilence 200;
@@ -286,9 +294,9 @@ proc wind {deg {vel 0 } {unit 0} {gusts 0} {gvel 0}} {
     set gvel [string trimright $gvel "s"]
   }
   
-  if {$vel > 0} {
-    regsub {^0+(\d+)} $vel {\1} vel
-  }
+  # if {$vel > 0} {
+  #   regsub {^0+(\d+)} $vel {\1} vel
+  # }
 
   if {$deg == "calm"} {
     playMsg "calm";
@@ -299,7 +307,8 @@ proc wind {deg {vel 0 } {unit 0} {gusts 0} {gvel 0}} {
     playNumberUnit $vel $unit;
     playUnit $unit $vel ;
   } else {
-    regsub {^0+(\d+)} $deg {\1} deg
+    # regsub {^0+(\d+)} $deg {\1} deg
+    playMsg "at"
     playNumberUnit $deg "unit_degree";
     playUnit "unit_degree" $deg;
     playSilence 100;
@@ -312,7 +321,7 @@ proc wind {deg {vel 0 } {unit 0} {gusts 0} {gvel 0}} {
     if {$gusts > 0} {
       playSilence 100;
       playMsg "gusts_up";
-      regsub {^0+(\d+)} $gusts {\1} gusts
+      # regsub {^0+(\d+)} $gusts {\1} gusts
       playNumberUnit $gusts "${gvel}_range";
       playUnit "${gvel}_range" $gusts;
     }
@@ -341,14 +350,14 @@ proc windvaries {from to} {
    playMsg "varies_from";
    playSilence 50;
    
-   regsub {^0+(\d+)} $from {\1} from
-   regsub {^0+(\d+)} $to {\1} to
+  #  regsub {^0+(\d+)} $from {\1} from
+  #  regsub {^0+(\d+)} $to {\1} to
 
    playNumberUnit $from "unit_degree_range";
    playSilence 50;
 
    playMsg "to";
-   playSilence 50;
+  #  playSilence 50;
    playNumberUnit $to "unit_degree_range";
 
    playUnit "unit_degree" $to;
@@ -424,19 +433,21 @@ proc rvr args {
 
 # airport is closed due to snow
 proc snowclosed {} {
-   playMag "aiport";
-   playMag "closed";
-   playMsg "due_to"
-   playMsg "sn";
+  #  playMag "aiport";
+  #  playMag "closed";
+  #  playMsg "due_to"
+  #  playMsg "sn";
+   playMsg "airport_closed_due_to_sn"
    playSilence 200;
 }
 
 
 # RWY is clear
 proc all_rwy_clear {} {
-  playMsg "all";
-  playMsg "runways";
-  playMsg "clr";
+  # playMsg "all";
+  # playMsg "runways";
+  # playMsg "clr";
+  playMsg "all_runways_clr";
   playSilence 200;
 }
 
@@ -522,8 +533,7 @@ proc clouds {obs height {cbs ""}} {
   playNumberUnit $height "unit_feet";
   #playSilence 100;
   playUnit "unit_feet" $height;
-
-  
+ 
   playSilence 200;
 }
 
@@ -558,7 +568,7 @@ proc max_daytemp {deg time} {
   playMsg "at";
   playSilence 50;
   
-  regsub {^0(\d)} $time {\1} time
+  # regsub {^0(\d)} $time {\1} time
   playNumberUnit $time "hour";
   playUnit "hour" $time
   playSilence 200;
@@ -583,7 +593,7 @@ proc min_daytemp {deg time} {
   playSilence 150;
   playMsg "at";
   playSilence 50;
-  regsub {^0(\d)} $time {\1} time
+  # regsub {^0(\d)} $time {\1} time
   playNumberUnit $time "hour";
   playSilence 200;
 }
@@ -594,7 +604,7 @@ proc rmk_maxtemp {val} {
   playMsg "maximal";
   playMsg "temperature";
   playMsg "for";
-  playMsg "last";
+  playMsg "last1";
   playNumberUnit 6 "hour";
   playUnit "hour" 6;
   # if {$val < 0} {
@@ -608,14 +618,12 @@ proc rmk_maxtemp {val} {
 
 # Minimum temperature in RMK section
 proc rmk_mintemp {val} {
-  playMsg "minimal";
+  playMsg "minimalf";
   playMsg "temperature";
-  playMsg "last";
+  playMsg "at"
+  playMsg "last1";
   playNumberUnit 6 "hour";
   playUnit "hour" 6;
-  # if {$val < 0} {
-  #   playMsg "minus";
-  # }
   playNumberUnit $val "unit_degree";
   playUnit "unit_degree" $val;
   playSilence 200;
@@ -632,17 +640,18 @@ proc remarks {} {
 
 # RMK section pressure trend next 3 h
 proc rmk_pressure {val args} {
-  playMsg "pressure";
   playMsg "tendency";
-  playMsg "next";
+  playMsg "at"
+  playMsg "next1";
   playNumberUnit 3 "hour";
   playUnit "hour" 3;
-  playSilence 150;
+  # playSilence 150;
+  playMsg "pressure";
   playNumberUnit $val "unit_mb";
   playUnit "unit_mb" $val;
-  playSilence 150;
+  # playSilence 150;
   # playMsg "unit_mbs";
-  playSilence 250;
+  # playSilence 250;
 
   foreach item $args {
      if [regexp {(\d+)} $item] {
@@ -650,7 +659,7 @@ proc rmk_pressure {val args} {
      } else {
        playMsg $item;
      }
-     playSilence 100;
+    #  playSilence 100;
   }
   playSilence 200;
 }
@@ -659,12 +668,17 @@ proc rmk_pressure {val args} {
 # precipitation last hours in RMK section
 proc rmk_precipitation {hour val} {
   playMsg "precipitation";
-  playMsg "last";
-  regsub {^0(\d)} $hour {\1} hour
+  if {$hour == 1 } {
+    playMsg "last";  
+  } else {
+    playMsg "last1";
+  }
+  
+  # regsub {^0(\d)} $hour {\1} hour
   playNumberUnit $hour "hour";
   playUnit "hour" $hour;
 
-  playSilence 150;
+  # playSilence 150;
   playNumberUnit $val "unit_inch";
   playUnit "unit_inch" $val;
   playSilence 200;
@@ -672,6 +686,7 @@ proc rmk_precipitation {hour val} {
 
 # precipitations in RMK section
 proc rmk_precip {args} {
+  playMsg "re";
   foreach item $args {
      if [regexp {(\d+)} $item] {
        sayNumber $item;
@@ -686,9 +701,10 @@ proc rmk_precip {args} {
 
 # daytime minimal/maximal temperature
 proc rmk_minmaxtemp {max min} {
+  playMsg "maximum";
   playMsg "daytime";
   playMsg "temperature";
-  playMsg "maximum";
+  
   # if { $max < 0} {
   #    playMsg "minus";
   #    set max [string trimleft $max "-"];
@@ -1023,7 +1039,6 @@ proc announce_airport {icao} {
 # say preconfigured airports
 proc airports args {
   global langdir;
-#  global lang;
   variable tval;
 
   foreach item $args {
@@ -1038,20 +1053,25 @@ proc airports args {
          spellWord $item;
        }
      }
-     playSilence 100;
+    #  playSilence 100;
   }
   playSilence 200;
 }
 
 
 # say clouds with covering
-proc cloudtypes {} {
+proc cloudtypes {args} {
 variable a 0;
   variable l [llength $args];
 
   while {$a < $l} {
     set msg [lindex $args $a];
-    playMsg "cld_$msg";
+    if { [string match "cld_*" $msg] } {
+      playMsg "$msg";
+    } else {
+      playMsg "cld_$msg";
+    }
+    
     playMsg "covering";
     incr a;
     playNumberUnit [lindex $args $a] "unit_eighth";

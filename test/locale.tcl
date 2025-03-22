@@ -6,6 +6,43 @@ source [file join [file dirname [info script]] dict.tcl]
 
 # Библиотека процедур для работы с числами
 
+# Процедура для имитации воспроизведения сообщения
+proc playMsg { modulename playingWord {warn 1}} {
+	
+	
+	# Словарь хранится в dict.tcl
+	global wordMap
+
+	# Проверяем, существует ли указанный каталог и файл в словаре
+	if {[dict exists $wordMap $modulename $playingWord]} {
+		set content [dict get $wordMap $modulename $playingWord]
+
+		# Выводим содержимое файла
+		foreach line $content {
+			puts -nonewline "$line "
+		}
+	} else {
+		puts "\033\[31mОшибка: Каталог '$modulename' или файл '$playingWord' не найдены в словаре.\033\[0m"
+		return 0
+	}
+	return 1
+	
+}
+
+proc playSilence {param} {
+	if {![info exists ::debugMode]} {
+		set value [expr {int($param)}]
+		if {$value < 200} {
+			puts -nonewline ", "
+		} else {
+			puts "."
+		}
+	} else {
+		puts "DEBUG*** debugMode found"
+		return;
+	}
+	
+}
 
 # locale.tcl
 # CUT UP WHEN DEBUG IS DONE ============================================================== <<<
@@ -25,19 +62,32 @@ source [file join [file dirname [info script]] dict.tcl]
 proc playNumberUnit { value {unit ""} } {
 	# числа произносим в модуле "Default"
 	set modulename "Default"
-
+	
+	# для пар число + единица удаляем лидирующие нули для предотвращения интерпретации числа как восьмеричного
+	set dangerous_units { hour minute }
+	if { [string match "unit_*" $unit] || [string match "*_range" $unit] || $unit in $dangerous_units} {
+		regsub {^0+(\d+)} $value {\1} value
+		# puts "***DEBUG value=$value"
+	}
+	
 	# валидные единицы
 	if { ![string is double -strict $value] } {
 		puts "\nERROR*** playNumberUnit получил недопустимое число ($value)"
 		exit 1
 	}
 	
+
+
+
 	# знак
 	if {$value < 0} {
 		playMsg "Default" "minus"
 		# Убираем знак для дальнейшей обработки
 		set value [expr {abs($value)}]
 	}
+
+	
+
 
 	# нулевая целая часть 
 	set isZeroIntegerPart [expr {$value < 1}]
@@ -150,6 +200,9 @@ proc playNumbers {value {unit ""} } {
 		return
 	}
 
+	
+	
+
 	# определяем какие единицы произносить после числа (тысячи, целые, десятые, сотые и их сочетания с _range)
 	set validUnits { thousand integer tenth hundredth thousand_range integer_range tenth_range hundredth_range}
 	
@@ -189,7 +242,6 @@ proc playNumbers {value {unit ""} } {
 	}
 
 
-
 	# работаем с именной частью
 	if { $unit in $validUnits && ($value > 0 || $tens > 0 || $hundreds > 0) } {
 		
@@ -210,9 +262,12 @@ proc playNumbers {value {unit ""} } {
 # количественная quantity часть служит для определения единственной или
 # множественной формы именной части и не произносится
 proc playUnit { unit quantity } {
-
+	# puts "***DEBUG playUnit: unit=$unit quantity=$quantity"
 	set modulename [getModuleName $unit]
-	
+	# удалить лидирующие нули из количества
+	regsub {^0+(\d+)} $quantity {\1} quantity
+	# puts "***DEBUG playUnit: unit=$unit quantity=$quantity"
+
 	# специальная логика для винительного падежа
 	if { [string match "*_range" $unit] } {		
 
@@ -242,7 +297,7 @@ proc playUnit { unit quantity } {
 	
 	# получаем базовое числительное
 	set numeral [getNumeral $quantity]
-	
+	# puts "***DEBUG playUnit: numeral=$numeral quantity=$quantity"
 	# если в unit есть "_range", получаем суффикс, посе чего удаляем "_range" из $unit и произносим полученную единицу
 	if {[string match "*_range" $unit]} {
 		set suffix [getUnitSuffix $unit $numeral]
@@ -294,7 +349,13 @@ proc getUnitSuffix {unit quantity} {
 	# эти всегда склоняются в единственном или множественном числе
 	set numeralUnits { integer integer_range tenth tenth_range hundredth hundredth_range minute_range hour_range} 
 	set quantity [getNumeral $quantity]
-		
+
+	# для круглых тысяч всегда возвращаем 2
+	if {$quantity >=1000 && $quantity % 1000 == 0 } {
+		# puts "круглые тысячи"
+		return "2"
+	}
+
 	# всегда склоняются в единственном или множественном числе
 	if {$unit in $numeralUnits } {		
 		if { [string match "*_range" $unit] } {
@@ -353,7 +414,10 @@ proc getNumeral {value} {
 
 		if {$remainder == 0} {
 			# Если остаток равен нулю, возвращаем только количество тысяч
-			set value $thousands
+			# set value $thousands
+
+			# круглые тысячи возвращаем полностью (для склонений целых тысяч)
+			return $value
 		} else {
 			# Если остаток не равен нулю, возвращаем только остаток
 			set value $remainder
@@ -456,27 +520,7 @@ proc playTime {hours minutes} {
 }
 
 
-# Процедура для имитации воспроизведения сообщения
-proc playMsg { modulename playingWord {warn 1}} {
 
-	# Словарь хранится в dict.tcl
-	global wordMap
-
-	# Проверяем, существует ли указанный каталог и файл в словаре
-	if {[dict exists $wordMap $modulename $playingWord]} {
-		set content [dict get $wordMap $modulename $playingWord]
-
-		# Выводим содержимое файла
-		foreach line $content {
-			puts -nonewline "$line "
-		}
-	} else {
-		puts "\033\[31mОшибка: Каталог '$modulename' или файл '$playingWord' не найдены в словаре.\033\[0m"
-		return 0
-	}
-	return 1
-	
-}
 
 proc spellNumber {number} {
   
@@ -513,17 +557,3 @@ proc playFrequency {fq} {
 }
 
 
-proc playSilence {param} {
-	if {![info exists ::debugMode]} {
-		set value [expr {int($param)}]
-		if {$value < 200} {
-			puts -nonewline ", "
-		} else {
-			puts "."
-		}
-	} else {
-		puts "DEBUG*** debugMode found"
-		return;
-	}
-	
-}

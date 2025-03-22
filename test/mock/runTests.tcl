@@ -1,6 +1,12 @@
 #!/usr/bin/env tclsh
 # Процедура для анализа аргументов и вызова соответствующей процедуры
 proc runTests {args} {
+	
+	# Инициируем переменные и подключаем модули
+	global langdir
+	set langdir "../ru_RU"
+
+	# MetarInfo
 	namespace eval MetarInfo {
 		# Объявляем переменную CFG_ID
 		variable CFG_ID
@@ -11,20 +17,32 @@ proc runTests {args} {
 			puts "*** ERROR CFG_ID не объявлена в runTest"
 			return
 		}
+
+		#  langdir
+		variable langdir
+		set langdir "../ru_RU"
+
+		proc spellWord word {
+			playMsg $word
+		}
+		
 	}
+	source "../MetarInfo.tcl"
+	
+	# Logic
 	namespace eval Logic {
 		variable CFG_TIME_FORMAT
 		if {![info exists CFG_TIME_FORMAT]} {
 			set CFG_TIME_FORMAT 24
 		}
 	}
-	
+	source "../Logic.tcl"
     
 	
 	# Загрузка библиотек
 	source "../locale.tcl"
-	source "../Logic.tcl"
-	source "../MetarInfo.tcl"
+	
+	
 	global argv
 	set argc [llength $args]
 	set arg1 [lindex $args 0]

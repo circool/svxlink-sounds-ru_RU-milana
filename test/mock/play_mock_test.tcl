@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh
 
-set ::debugMode 0
+set ::debugMode 1
 
 
 # Этот файл располагается в директории /test/mock
