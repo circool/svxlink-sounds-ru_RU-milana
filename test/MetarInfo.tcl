@@ -19,7 +19,6 @@ namespace eval MetarInfo {
 # Check if this module is loaded in the current logic core
 #
 if {![info exists CFG_ID]} {
-  # puts "*** ERROR CFG_ID не существует "
   return;
 }
 
