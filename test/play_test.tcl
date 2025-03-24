@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh
 global debugMode
-set ::debugMode 0
+set ::debugMode 1
 
 # Устанавливаем переменную окружения
 set ::env(TEST_DEBUG_MODE) $debugMode    
