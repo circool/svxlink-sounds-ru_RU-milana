@@ -62,27 +62,38 @@ variable second_tick_subscribers [list];
 #
 variable sql_rx_id "?";
 
-#
+# приветствие при включении ("на частоте работает ...") + краткий позывной CW
 # Executed when the SvxLink software is started
 #
 proc startup {} {
+  variable CFG_TYPE;
+  global mycall;
   playMsg "Core" "online"
-  send_short_ident
+  if {$CFG_TYPE == "Repeater"} {
+    playMsg "Core" "repeater";
+  } elseif {$CFG_TYPE == "Simplex"} {
+    playMsg "Core" "simplex";
+  } elseif {$CFG_TYPE == "Reflector"} {
+    playMsg "Core" "reflector";
+  }
+
+  spellWord $mycall;
 }
 
 
-#
+# модуль ... не найден
 # Executed when a specified module could not be found
 #   module_id - The numeric ID of the module
 #
 proc no_such_module {module_id} {
   playMsg "Core" "module"
   playNumber $module_id;
-  playMsg "Core" "not_found";
+  playMsg "Core" "not";
+  playMsg "Core" "found";
 }
 
 
-#
+# ручная идентификация
 # Executed when a manual identification is initiated with the * DTMF code
 #
 proc manual_identification {} {
@@ -99,10 +110,17 @@ proc manual_identification {} {
   set prev_ident $epoch;
 
   playMsg "Core" "online";
-  spellWord $mycall;
+  
   if {$CFG_TYPE == "Repeater"} {
     playMsg "Core" "repeater";
+  } elseif {$CFG_TYPE == "Simplex"} {
+    playMsg "Core" "simplex";
+  } elseif {$CFG_TYPE == "Reflector"} {
+    playMsg "Core" "reflector";
   }
+
+  spellWord $mycall;
+  
   playSilence 250;
   playMsg "Core" "the_time_is";
   playTime $hour $minute;
@@ -269,11 +287,13 @@ proc send_rgr_sound {} {
 }
 
 
-# Операция не удалась ?
+# получена пустая макрокоманда
 # Executed when an empty macro command (i.e. D#) has been entered.
 #
 proc macro_empty {} {
-  playMsg "Core" "macro_empty";
+  playMsg "Core" "receivedf"; 
+  playMsg "Core" "emptyf";
+  playMsg "Core" "macro";
 }
 
 
@@ -282,12 +302,13 @@ proc macro_empty {} {
 #
 proc macro_not_found {} {
   playMsg "Core" "macro";
-  playMsg "Core" "not_foundf";
+  playMsg "Core" "not";
+  playMsg "Core" "foundf";
 
 }
 
 
-# Макрокоманда содержит ошибки
+# макрокоманда содержит ошибки
 # Executed when a macro syntax error occurs (configuration error).
 #
 proc macro_syntax_error {} {
@@ -297,107 +318,129 @@ proc macro_syntax_error {} {
 }
 
 
-# Модуль не найден
+# макрокоманда содержит ошибки, модуль не найден
 # Executed when the specified module in a macro command is not found
 # (configuration error).
 #
 proc macro_module_not_found {} {
   playMsg "Core" "macro";
   playMsg "Core" "has_error";
+  playSilence 100;
   playMsg "Core" "module";
-  playMsg "Core" "not_found";
+  playMsg "Core" "not";
+  playMsg "Core" "found";
 }
 
 
-#
+# не удалось включить модуль
 # Executed when the activation of the module specified in the macro command
 # failed.
 #
 proc macro_module_activation_failed {} {
-  playMsg "Core" "operation_failed";
+  
+  playMsg "Core" "not";
+  playMsg "Core" "success";
+  playMsg "Core" "turn_on";
+  playMsg "Core" "module";
 }
 
 
-#
+# невозможно включить модуль пока активен модуль ...
 # Executed when a macro command is executed that requires a module to
 # be activated but another module is already active.
 #
 proc macro_another_active_module {} {
   global active_module;
-
-  playMsg "Core" "operation_failed";
-  playMsg "Core" "active_module";
+  playMsg "Core" "not_forbidden";
+  playMsg "Core" "turn_on";
+  playMsg "Core" "module";
+  playMsg "Core" "until";
+  playMsg "Core" "active1";
+  playMsg "Core" "module";
   playMsg $active_module "name";
 }
 
 
-#
+# неизвестная команда
 # Executed when an unknown DTMF command is entered
 #   cmd - The command string
 #
 proc unknown_command {cmd} {
   
-  playMsg "Core" "unknown_command";
+  playMsg "Core" "unknownf";
+  playMsg "Core" "command";
   spellWord $cmd;
 }
 
 
-#
+# не удалось выполнить команду ...
 # Executed when an entered DTMF command failed
 #   cmd - The command string
 #
 proc command_failed {cmd} {
+  playMsg "Core" "not";
+  playMsg "Core" "success";
+  playMsg "Core" "execute";
+  playMsg "Core" "command1";
   spellWord $cmd;
-  playMsg "Core" "operation_failed";
+  
 }
 
 
-#
+# выполняется соединение с ... 
 # Executed when a link to another logic core is activated.
 #   name  - The name of the link
 #
 proc activating_link {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "activating_link_to";
+    playMsg "Core" "processing";
+    playMsg "Core" "connection";
+    playMsg "Core" "with";
     spellWord $name;
   }
 }
 
 
-#
+# разрывается соединение с ...
 # Executed when a link to another logic core is deactivated.
 #   name  - The name of the link
 #
 proc deactivating_link {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "deactivating_link_to";
+    playMsg "Core" "disconnecting";
+    playMsg "Core" "with";
     spellWord $name;
   }
 }
 
 
-#
+# узел ... не активен
 # Executed when trying to deactivate a link to another logic core but the
 # link is not currently active.
 #   name  - The name of the link
 #
 proc link_not_active {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "link_not_active_to";
+    playMsg "Core" "link";
     spellWord $name;
+    playMsg "Core" "not";
+    playMsg "Core" "active1";
   }
 }
 
 
-#
+# линк ... уже подключен
 # Executed when trying to activate a link to another logic core but the
 # link is already active.
 #   name  - The name of the link
 #
 proc link_already_active {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "link_already_active_to";
+    playMsg "Core" "link";
     spellWord $name;
+    playMsg "Core" "already";
+    playMsg "Core" "active1";
+    
   }
 }
 
@@ -437,7 +480,7 @@ proc squelch_open {rx_id is_open} {
 # return 0 to make SvxLink continue processing as normal.
 #
 proc dtmf_digit_received {digit duration} {
-  #puts "DTMF digit \"$digit\" detected with duration $duration ms";
+  puts -nonewline "получена DTMF посылка $digit продолжительностью в $duration миллисекунд";
   return 0;
 }
 
@@ -577,7 +620,7 @@ proc checkPeriodicIdentify {} {
   }
 
   if {$long_ident_now} {
-    puts "$logic_name: Sending long identification...";
+    puts "$logic_name: Передается полная идентификация...";
     send_long_ident $hour $minute;
     set prev_ident $now;
     set need_ident 0;
@@ -590,7 +633,7 @@ proc checkPeriodicIdentify {} {
     }
 
     if {$short_ident_now} {
-      puts "$logic_name: Sending short identification...";
+      puts "$logic_name: Передается краткая идентификация...";
       send_short_ident $hour $minute;
       set prev_ident $now;
       set need_ident 0;
@@ -599,7 +642,7 @@ proc checkPeriodicIdentify {} {
 }
 
 
-#
+# 
 # Executed when the QSO recorder is being activated
 #
 proc activating_qso_recorder {} {
@@ -623,7 +666,8 @@ proc deactivating_qso_recorder {} {
 #
 proc qso_recorder_not_active {} {
   playMsg "Core" "qso_recorder";
-  playMsg "Core" "not_active";
+  playMsg "Core" "not";
+  playMsg "Core" "active1";
 }
 
 
@@ -633,27 +677,30 @@ proc qso_recorder_not_active {} {
 #
 proc qso_recorder_already_active {} {
   playMsg "Core" "qso_recorder";
-  playMsg "Core" "already_active";
+  playMsg "Core" "already";
+  playMsg "Core" "active1";
 }
 
 
-#
+# Q S O рекордер подключен по таймауту
 # Executed when the timeout kicks in to activate the QSO recorder
 #
 proc qso_recorder_timeout_activate {} {
-  playMsg "Core" "timeout"
-  playMsg "Core" "activating";
   playMsg "Core" "qso_recorder";
+  playMsg "Core" "connected";
+  playMsg "Core" "due_timeout"
+  
+  
 }
 
 
-#
+# Q S O рекордер отключен по таймауту
 # Executed when the timeout kicks in to deactivate the QSO recorder
 #
 proc qso_recorder_timeout_deactivate {} {
-  playMsg "Core" "timeout"
-  playMsg "Core" "deactivating";
   playMsg "Core" "qso_recorder";
+  playMsg "Core" "disconnected";
+  playMsg "Core" "due_timeout"
 }
 
 

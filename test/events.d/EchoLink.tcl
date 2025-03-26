@@ -412,7 +412,7 @@ proc play_node_id {my_node_id} {
 #
 proc command_failed {cmd} {
   spellWord $cmd;
-  playMsg "operation_failed";
+  Module::playCoreMsg "operation_failed";
 }
 
 
@@ -421,7 +421,7 @@ proc command_failed {cmd} {
 #
 proc unknown_command {cmd} {
   spellWord $cmd;
-  playMsg "unknown_command";
+  Module::playCoreMsg "unknown_command";
 }
 
 
@@ -435,13 +435,13 @@ proc listen_only {status activate} {
   variable module_name;
 
   if {$status == $activate} {
-    playMsg "listen_only";
-    playMsg [expr {$status ? "already_active" : "not_active"}];
+    Module::playCoreMsg "listen_only";
+    Module::playCoreMsg [expr {$status ? "already_active" : "not_active"}];
   } else {
-    puts "$module_name: [expr {$activate ? "Включается" : "Выключается"}]\
+    puts "$module_name: [expr {$activate ? "Включается" : "Выключается"}]
           режим \"только прослушивание\".";
-    playMsg [expr {$activate ? "activating" : "deactivating"}];
-    playMsg "listen_only";
+    Module::playCoreMsg [expr {$activate ? "activating" : "deactivating"}];
+    Module::playCoreMsg "listen_only";
   }
 }
 

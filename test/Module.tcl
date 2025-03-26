@@ -10,7 +10,7 @@
 namespace eval Module {
 
 
-#
+# включается модуль ...
 # Executed when a module is being activated
 #
 proc activating_module {module_name} {
@@ -22,7 +22,7 @@ proc activating_module {module_name} {
 }
 
 
-#
+# выключается модуль ...
 # Executed when a module is being deactivated.
 #
 proc deactivating_module {module_name} {
@@ -34,14 +34,14 @@ proc deactivating_module {module_name} {
 }
 
 
-#
+# модуль ... отключен по тайм-ауту
 # Executed when the inactivity timeout for a module has expired.
 #
 proc timeout {module_name} {
   
   playMsg "Core" "module";
   playMsg $module_name "name";
-  playMsg "Core" "deactivating";
+  playMsg "Core" "disconnected";
   playMsg "Core" "with_timeout";
   playSilence 100;
 }

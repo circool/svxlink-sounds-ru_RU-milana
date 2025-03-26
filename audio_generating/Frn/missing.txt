@@ -1,1 +1,0 @@
-../audio_generating/Frn/connected_client1.txt

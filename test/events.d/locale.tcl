@@ -570,9 +570,10 @@ proc getModuleName {unit} {
 	# puts "DEBUG: getGender: Получен аргумент $unit"
 	if {[string match "unit_*" $unit] } {
 		set result "MetarInfo"
-	} elseif {[string match "Hz" $unit] } {
-		set result "Core"	
-	}
+	} elseif {[string match "el_*" $unit]} {
+		set result "EchoLink"
+	} elseif {[string match "frn_*" $unit]} {
+		set result "Frn"
 	} else {
 		set result "Default"
 	}
@@ -629,7 +630,6 @@ proc getUnitSuffix {unit quantity} {
 		return "2"
 	}
 }
-
 
 
 proc getNumeral {value} {

@@ -3,6 +3,9 @@ source [file join [file dirname [info script]] dict.tcl]
 # puts "Loading mocks"
 # Библиотека процедур для работы с числами
 
+
+variable ::showPauses 0
+
 # Процедура для имитации воспроизведения сообщения
 proc playMsg { modulename playingWord {warn 1}} {
 	# puts "***DEBUG playMsg modulename=$modulename playingWord=$playingWord"
@@ -19,7 +22,10 @@ proc playMsg { modulename playingWord {warn 1}} {
 			puts -nonewline "$line "
 		}
 	} else {
-		puts "\033\[31mОшибка: Каталог '$modulename' или файл '$playingWord' не найдены в словаре.\033\[0m"
+		if {$warn} {
+			puts "\033\[31m*** WARNING: Каталог '$modulename' или файл '$playingWord' не найдены в словаре.\033\[0m"
+		}	
+		
 		return 0
 	}
 	return 1
@@ -52,12 +58,16 @@ proc spellNumber {number} {
 }
 
 proc playSilence {param} {
-	return
-	set value [expr {int($param)}]
-	if {$value < 200} {
-		puts -nonewline ","
+	
+	if { $::showPauses } {
+		set value [expr {int($param)}]
+		if {$value < 200} {
+			puts -nonewline ","
+		} else {
+			puts -nonewline "."
+		}
 	} else {
-		puts "."
+		return
 	}
 }
 
@@ -226,7 +236,7 @@ proc playNumberUnit { value {unit ""} } {
 proc playNumbers {value {unit ""} } {
 
 	# для тестов.
-	set modulename "Default"
+	# set modulename "Default"
 
 
 	# Ошибка для чисел вне рабочего диапазона
@@ -234,9 +244,6 @@ proc playNumbers {value {unit ""} } {
 		puts "ERROR*** playNumbers получил недопустимое число ($value)"
 		return
 	}
-
-	
-	
 
 	# определяем какие единицы произносить после числа (тысячи, целые, десятые, сотые и их сочетания с _range)
 	set validUnits { thousand integer tenth hundredth thousand_range integer_range tenth_range hundredth_range}
@@ -253,7 +260,6 @@ proc playNumbers {value {unit ""} } {
 		set value [expr {$value - $hundreds * 100}]
 	}
 
-
 	# работаем с десятками (только если число заканчивается на 20+)
 	set tens [expr {$value / 10}]
 	if {$tens >= 2} {
@@ -268,14 +274,11 @@ proc playNumbers {value {unit ""} } {
 		set value [expr {$value - $tens * 10}]
 	}
 
-	
-
 	# работаем с единицами (от 1 до 19)
 	if {$value > 0} {
 		set suffix [getNumberSuffix $value $unit]
 		playMsg "Default" "${value}${suffix}"
 	}
-
 
 	# работаем с именной частью
 	if { $unit in $validUnits && ($value > 0 || $tens > 0 || $hundreds > 0) } {
@@ -365,6 +368,8 @@ proc getModuleName {unit} {
 		set result "MetarInfo"
 	} elseif {[string match "el_*" $unit]} {
 		set result "EchoLink"
+	} elseif {[string match "frn_*" $unit]} {
+		set result "Frn"
 	} else {
 		set result "Default"
 	}
@@ -425,8 +430,6 @@ proc getUnitSuffix {unit quantity} {
 		return "2"
 	}
 }
-
-
 
 proc getNumeral {value} {
 	# удаляем минус
@@ -567,4 +570,18 @@ namespace eval MetarInfo {
 	proc spellWord word {
 		playMsg $word
 	}
+}
+
+namespace eval Module {
+  proc playSubcommands {module_name help_subcmd help_anounce} {
+    playMsg $module_name "help" 
+    playMsg "Core" $help_anounce
+	playSilence 100
+	playMsg $module_name $help_subcmd
+  }
+
+  proc playCoreMsg {msg} {
+	playMsg "Core" $msg
+  }
+
 }

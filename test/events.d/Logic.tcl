@@ -270,7 +270,8 @@ proc send_rgr_sound {} {
 # Executed when an empty macro command (i.e. D#) has been entered.
 #
 proc macro_empty {} {
-  playMsg "Core" "operation_failed";
+  playMsg "Core" "has_empty";
+  playMsg "Core" "macro";
 }
 
 
@@ -278,7 +279,8 @@ proc macro_empty {} {
 # Executed when an entered macro command could not be found
 #
 proc macro_not_found {} {
-  playMsg "Core" "operation_failed";
+  playMsg "Core" "macro";
+  playMsg "Core" "not_foundf";
 }
 
 
@@ -286,7 +288,8 @@ proc macro_not_found {} {
 # Executed when a macro syntax error occurs (configuration error).
 #
 proc macro_syntax_error {} {
-  playMsg "Core" "operation_failed";
+  playMsg "Core" "macro";
+  playMsg "Core" "has_error";
 }
 
 
@@ -295,7 +298,12 @@ proc macro_syntax_error {} {
 # (configuration error).
 #
 proc macro_module_not_found {} {
-  playMsg "Core" "operation_failed";
+  
+  playMsg "Core" "macro";
+  playMsg "Core" "has_error";
+  playSilence 100
+  playMsg "Core" "module";
+  playMsg "Core" "not_found";
 }
 
 
@@ -787,10 +795,7 @@ if [info exists CFG_LONG_CW_ID_ENABLE] {
   set long_cw_id_enable $CFG_LONG_CW_ID_ENABLE
 }
 
-if [info exists CFG_ADMIN_HELP_ENABLE] {
-  set admin_help_enable $CFG_ADMIN_HELP_ENABLE
-  
-}
+
 # end of namespace
 }
 

@@ -1,6 +1,15 @@
 #!/usr/bin/env tclsh
+
+# отладка 
+# 1 - выбирать только особо назначенные файлы для тестирования и выводить все результаты для сравнения
+# 0 - прогонять все файлы, выводить только ошибки
 global debugMode
 set ::debugMode 1
+
+# визуализация пауз (отображение результата playSilence)
+# - паузы более 200 показаны точками, менее - запятыми
+# global showPauses
+# set ::showPauses 0
 
 # Устанавливаем переменную окружения
 set ::env(TEST_DEBUG_MODE) $debugMode    
@@ -8,8 +17,9 @@ set ::env(TEST_DEBUG_MODE) $debugMode
 # Процедура для запуска runTests с заданными параметрами
 # Возвращает 1, если тест не пройден, и 0, если тест пройден успешно
 proc runTest { args expected } {
-    global debugMode
-    
+    global debugMode  
+    # global showPauses
+
     # Запускаем runTests.tcl и захватываем его вывод
     set result [exec ./runTests.tcl {*}$args]
 
@@ -36,9 +46,9 @@ proc runTest { args expected } {
 set testFailed 0
 
 # Процедура для запуска тестов из файла
-proc runTestsFromFile {file} {
-    
+proc runTestsFromFile {file} {   
     global debugMode
+    global showPauses
     global testFailed
 
     # Локальная переменная для отслеживания ошибок в текущем файле
@@ -75,59 +85,37 @@ proc runTestsFromFile {file} {
     }
 }
 
-# Обрабатываем каждый файл по отдельности
+
+
+
+# Список файлов для тестирования
+set testFiles {
+    "./data_table/reflector_test_data.tcl"
+    "./data_table/logic_test_data.tcl"
+    "./data_table/echolink_test_data.tcl"
+    "./data_table/metar_test_data.tcl"
+    "./data_table/num_test_data.tcl"
+    "./data_table/num_test_female_data.tcl"
+    "./data_table/numbers_test_data.tcl"
+    "./data_table/time_test_data.tcl"
+    "./data_table/numbers_with_unit_test_data.tcl"
+    "./data_table/numbers_with_units_test_data.tcl"
+}
+
+set debugFiles {
+    "./data_table/reflector_test_data.tcl"
+}
+
 if { $debugMode } {
-    # Включен режим отладки - проверяем только проблемные строки, выводим любой результат в консоль
-    # set file "./data_table/problem_test_data.tcl"
-    set file "./data_table/echolink_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
+    # В режиме отладки берем только первый файл из списка
+    set fileList $debugFiles
 } else {
-    
-    # Выключен режим отладки - проверяем все строки, выводим ошибки в консоль
-    
-    set file "./data_table/logic_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
+    set fileList $testFiles
+}
 
-
-    set file "./data_table/echolink_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
+foreach file $fileList {
+    puts -nonewline "\nОбрабатываю файл $file."
     runTestsFromFile $file
-    
-    set file "./data_table/metar_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file 
-    
-    
-    set file "./data_table/num_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
-    
-    set file "./data_table/num_test_female_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
-
-    set file "./data_table/numbers_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
-
-    set file "./data_table/time_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
-
-    # set file "./data_table/time12_test_data.tcl"
-    # puts -nonewline "\nОбрабатываю файл $file. "
-    # runTestsFromFile $file
-
-    set file "./data_table/numbers_with_unit_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
-
-    set file "./data_table/numbers_with_units_test_data.tcl"
-    puts -nonewline "\nОбрабатываю файл $file. "
-    runTestsFromFile $file
-
 }
 
 
