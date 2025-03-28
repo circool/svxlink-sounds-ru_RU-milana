@@ -30,6 +30,7 @@ set module_name [namespace tail [namespace current]];
 #
 proc playMsg {msg} {
   variable module_name;
+  # puts "\noverloaded EchoLink playMsg modulename = $module_name msg=$msg"
   ::playMsg $module_name $msg;
 }
 
@@ -120,9 +121,9 @@ proc spellEchoLinkCallsign {call} {
 # That is, someone press DTMF "1#" when the EchoLink module is active.
 #
 proc list_connected_stations {connected_stations} {
-  playNumberUnit [llength $connected_stations] "female";
-  playSilence 50;
-  playMsg "connected_stations";
+  set quantity [llength $connected_stations];
+  playNumberWithUnits $quantity "el_connected_station"
+  
   foreach {call} "$connected_stations" {
     spellEchoLinkCallsign $call;
     playSilence 250;
@@ -136,6 +137,7 @@ proc list_connected_stations {connected_stations} {
 #
 proc directory_server_offline {} {
   playMsg "directory_server_offline";
+  Module::playCoreMsg "please_try_again_later";
 }
 
 
@@ -145,7 +147,7 @@ proc directory_server_offline {} {
 #
 proc no_more_connections_allowed {} {
   # FIXME: Change the message to something that makes more sense...
-  playMsg "link_busy";
+  playMsg "limit_exceeded";
 }
 
 
@@ -159,8 +161,7 @@ proc status_report {} {
   global active_module;
   
   if {$active_module == $module_name} {
-    playNumberUnit $num_connected_stations "female";
-    playMsg "connected_stations";
+    playNumberWithUnits $num_connected_stations "el_connected_station";
   }
 }
 
@@ -169,8 +170,12 @@ proc status_report {} {
 # Executed when an EchoLink id cannot be found in an outgoing connect request.
 #
 proc station_id_not_found {station_id} {
-  playNumber $station_id;
-  playMsg "not_found";
+  Module::playCoreMsg "station"
+  Module::playCoreMsg "with"
+  playMsg "station_id2"
+  spellNumber $station_id;
+  Module::playCoreMsg "not"
+  Module::playCoreMsg "foundf";
 }
 
 
@@ -179,7 +184,10 @@ proc station_id_not_found {station_id} {
 # request.
 #
 proc lookup_failed {station_id} {
-  playMsg "operation_failed";
+  Module::playCoreMsg "callsign";
+  spellEchoLinkCallsign $station_id 
+  Module::playCoreMsg "not"
+  Module::playCoreMsg "found"
 }
 
 
@@ -187,18 +195,22 @@ proc lookup_failed {station_id} {
 # Executed when a local user tries to connect to the local node.
 #
 proc self_connect {} {
-  playMsg "operation_failed";
+  playMsg "self_connect";
 }
 
 
-#
+# соединение с ... уже установлено
 # Executed when a local user tries to connect to a node that is already
 # connected.
 #
 proc already_connected_to {call} {
-  playMsg "already_connected_to";
-  playSilence 50;
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "with";
   spellEchoLinkCallsign $call;
+  Module::playCoreMsg "already";
+  Module::playCoreMsg "established"
+  playSilence 50;
+  
 }
 
 
@@ -206,26 +218,29 @@ proc already_connected_to {call} {
 # Executed when an internal error occurs.
 #
 proc internal_error {} {
-  playMsg "operation_failed";
+  Module::playCoreMsg "operation_failed";
 }
 
 
-#
+# выполняется соединение с ...
 # Executed when an outgoing connection has been requested.
 #
 proc connecting_to {call} {
-  playMsg "connecting_to";
+  Module::playCoreMsg "do";
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "with";
   spellEchoLinkCallsign $call;
   playSilence 500;
 }
 
 
-#
+# разрывается соединение с ...
 # Executed when an EchoLink connection has been terminated
 #
 proc disconnected {call} {
+  Module::playCoreMsg "disconnecting"
+  Module::playCoreMsg "with"
   spellEchoLinkCallsign $call;
-  playMsg "disconnected";
   playSilence 500;
 }
 
@@ -234,8 +249,14 @@ proc disconnected {call} {
 # Executed when an incoming EchoLink connection has been accepted.
 #
 proc remote_connected {call} {
-  playMsg "connected";
+  Module::playCoreMsg "established";
+  Module::playCoreMsg "remote"
+  Module::playCoreMsg "incoming"
+  
+  Module::playCoreMsg "connection"
+  Module::playCoreMsg "with"
   spellEchoLinkCallsign $call;
+  
   playSilence 500;
 }
 
@@ -246,7 +267,10 @@ proc remote_connected {call} {
 #
 proc connected {call} {
   #puts "Outgoing Echolink connection to $call established"
-  playMsg "connected";
+  Module::playCoreMsg "established";
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "with";
+  spellEchoLinkCallsign $call;
   playSilence 500;
 }
 
@@ -256,9 +280,9 @@ proc connected {call} {
 #   client_list - List of connected clients
 #
 proc client_list_changed {client_list} {
-  #foreach {call} $client_list {
-  #  puts $call
-  #}
+  foreach {call} $client_list {
+   puts -nonewline "$call "
+  }
 }
 
 
@@ -267,7 +291,8 @@ proc client_list_changed {client_list} {
 # connection will be terminated.
 #
 proc link_inactivity_timeout {} {
-  playMsg "timeout";
+  Module::playCoreMsg "timeout";
+  playMsg link_inactivity_timeout
 }
 
 
@@ -275,19 +300,22 @@ proc link_inactivity_timeout {} {
 # Executed when a too short connect by callsign command is received
 #
 proc cbc_too_short_cmd {cmd} {
+  playMsg "too_short"
+  Module::playCoreMsg "command"
   spellWord $cmd;
   playSilence 50;
-  playMsg "operation_failed";
 }
 
 
-#
+# нет совпадений для 
 # Executed when the connect by callsign function cannot find a match
 #
 proc cbc_no_match {code} {
-  playNumber $code;
+  Module::playCoreMsg "no_match";
+  Module::playCoreMsg "for";
+  spellNumber $code;
   playSilence 50;
-  playMsg "no_match";
+  
 }
 
 
@@ -311,7 +339,8 @@ proc cbc_list {call_list} {
 # Executed when the connect by callsign function is manually aborted
 #
 proc cbc_aborted {} {
-  playMsg "aborted";
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "aborted";
 }
 
 
@@ -340,7 +369,9 @@ proc cbc_too_many_matches {} {
 # by callsign function
 #
 proc cbc_timeout {} {
-  playMsg "aborted";
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "aborted";
+  Module::playCoreMsg "due_timeout";
 }
 
 
@@ -366,8 +397,9 @@ proc dbc_list {call_list} {
 # Executed when the disconnect by callsign function is manually aborted
 #
 proc dbc_aborted {} {
-  playMsg "disconnect_by_callsign";
-  playMsg "aborted";
+  # playMsg "disconnect_by_callsign";
+  
+  Module::playCoreMsg "aborted";
 }
 
 
@@ -382,13 +414,16 @@ proc dbc_index_out_of_range {idx} {
 }
 
 
-#
+# соединение прервано по тайм-ауту
 # Executed when no station have been chosen in 60 seconds in the disconnect
 # by callsign function
 #
 proc dbc_timeout {} {
-  playMsg "disconnect_by_callsign";
-  playMsg "timeout";
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "aborted";
+  # playMsg "disconnect_by_callsign";
+
+  Module::playCoreMsg "due_timeout";
 }
 
 
@@ -397,13 +432,16 @@ proc dbc_timeout {} {
 # local node ID.
 #
 proc play_node_id {my_node_id} {
-  playMsg "node_id_is";
-  playSilence 200;
-  if { $my_node_id != 0} {
-    playNumber $my_node_id;
+  
+  if { $my_node_id == 0} {
+    Module::playCoreMsg "unknownm";
+    playMsg "node_id_is"; 
   } else {
-    playMsg "unknown";
+    playMsg "node_id_is";
+    spellNumber $my_node_id;
   }
+  playSilence 200;
+  
 }
 
 
@@ -411,17 +449,21 @@ proc play_node_id {my_node_id} {
 # Executed when an entered command failed or have bad syntax.
 #
 proc command_failed {cmd} {
+  Module::playCoreMsg "command";
   spellWord $cmd;
-  Module::playCoreMsg "operation_failed";
+  Module::playCoreMsg "not"
+  Module::playCoreMsg "operatedf";
 }
 
 
-#
+# неизвестная команда ...
 # Executed when an unrecognized command has been received.
 #
 proc unknown_command {cmd} {
+  Module::playCoreMsg "unknownf";
+  Module::playCoreMsg "command";
   spellWord $cmd;
-  Module::playCoreMsg "unknown_command";
+  
 }
 
 
@@ -433,27 +475,26 @@ proc unknown_command {cmd} {
 #
 proc listen_only {status activate} {
   variable module_name;
-
-  if {$status == $activate} {
-    Module::playCoreMsg "listen_only";
-    Module::playCoreMsg [expr {$status ? "already_active" : "not_active"}];
-  } else {
-    puts "$module_name: [expr {$activate ? "Включается" : "Выключается"}]
-          режим \"только прослушивание\".";
-    Module::playCoreMsg [expr {$activate ? "activating" : "deactivating"}];
-    Module::playCoreMsg "listen_only";
+  Module::playCoreMsg "listen_only";
+  
+  if {$status == $activate } {
+    Module::playCoreMsg "already"
   }
+  Module::playCoreMsg [expr {$activate ? "activating" : "deactivating"}];
 }
 
 
-#
+# попытка подключения к ... отклонена
 # Executed when an outgoing connection is rejected. This can happen if
 # REJECT_OUTGOING and/or ACCEPT_OUTGOING has been setup.
 #
 proc reject_outgoing_connection {call} {
+  playMsg "tryout_connecting";
+  # Module::playCoreMsg "with";
   spellEchoLinkCallsign $call;
+  Module::playCoreMsg "rejectedf"
   playSilence 50;
-  playMsg "reject_connection";
+  
 }
 
 
@@ -504,7 +545,7 @@ proc info_received {call msg} {
 # Executed when a configuration variable is updated at runtime
 #
 proc config_updated {tag value} {
-  #puts "Configuration variable updated: $tag=$value"
+  puts "Configuration variable updated: $tag=$value"
 }
 
 
@@ -522,16 +563,19 @@ proc remote_greeting {call} {
 }
 
 
-#
+# входящее удаленное соединение отклонено [Пожалуйста, попробуйте позднее]
 # Executed when an incoming connection is rejected
 #
 proc reject_remote_connection {perm} {
   playSilence 1000;
-  if {$perm} {
-    playMsg "reject_connection";
-  } else {
-    playMsg "reject_connection";
-    playMsg "please_try_again_later"
+  Module::playCoreMsg "incoming"
+  Module::playCoreMsg "remote"
+  Module::playCoreMsg "connection"
+
+  Module::playCoreMsg "rejected";
+  
+  if {$perm == 0} {
+    Module::playCoreMsg "please_try_again_later"
   }
   playSilence 1000;
 }

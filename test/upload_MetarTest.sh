@@ -10,6 +10,6 @@ fi
 # обновляем словарь
 ./utils/gen_dict.tcl -r ../audio_generating
 # выгружает рабочие файлы на сервер
-scp locale.tcl 		root@$ip_svxlink:/usr/share/svxlink/sounds/ru_RU/events.d/local
+scp ./events.d/locale.tcl 		root@$ip_svxlink:/usr/share/svxlink/sounds/ru_RU/events.d/local
 scp dict.tcl 		root@$ip_svxlink:/usr/share/svxlink/sounds/ru_RU/events.d/local
-scp MetarInfo.tcl 	root@$ip_svxlink:/usr/share/svxlink/sounds/ru_RU/events.d/local
+scp ./events.d/MetarInfo.tcl 	root@$ip_svxlink:/usr/share/svxlink/sounds/ru_RU/events.d/local

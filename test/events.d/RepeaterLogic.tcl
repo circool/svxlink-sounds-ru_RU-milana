@@ -15,6 +15,7 @@ namespace eval RepeaterLogic {
 # Checking to see if this is the current logic core type
 #
 if {$logic_name != [namespace tail [namespace current]]} {
+  puts "not valid logic"
   return;
 }
 
@@ -225,13 +226,15 @@ proc repeater_up {reason} {
       return;
     }
     set Logic::prev_ident $now;
-
-    spellWord $mycall;
+    
     playMsg "Core" "repeater";
+    spellWord $mycall;
+    
     playSilence 250;
 
     if {$active_module != ""} {
-      playMsg "Core" "active_module";
+      playMsg "Core" "active";
+      playMsg "Core" "module";
       playMsg $active_module "name";
     }
   }
@@ -252,6 +255,8 @@ proc repeater_down {reason} {
 
   if {$reason == "SQL_FLAP_SUP"} {
     playSilence 500;
+    playMsg "Core" "repeater";
+    playMsg "Core" "deactivating"
     playMsg "Core" "interference";
     playSilence 500;
     return;
@@ -266,9 +271,9 @@ proc repeater_down {reason} {
     return;
   }
   set Logic::prev_ident $now;
-
-  spellWord $mycall;
   playMsg "Core" "repeater";
+  spellWord $mycall;
+  
   playSilence 250;
 
   #playMsg "../extra-sounds" "shutdown";
@@ -439,7 +444,7 @@ proc remote_cmd_received {logic cmd} {
 #   logic -- The name of the logic core
 #   tg    -- The received talkgroup
 #
-proc remote_received_tg_updated {logic tg} {
+proc remote_cmd_received {logic tg} {
   Logic::remote_received_tg_updated "$logic" "$tg"
 }
 

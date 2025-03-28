@@ -1,16 +1,16 @@
 ###############################################################################
 #
-# DtmfRepeater module event handlers
+# Frn module event handlers
 #
 ###############################################################################
 
 #
 # This is the namespace in which all functions and variables below will exist.
 # The name must match the configuration variable "NAME" in the
-# [ModuleDtmfRepeater] section in the configuration file. The name may be changed
+# [ModuleFrn] section in the configuration file. The name may be changed
 # but it must be changed in both places.
 #
-namespace eval DtmfRepeater {
+namespace eval Frn {
 
 #
 # Check if this module is loaded in the current logic core
@@ -88,9 +88,59 @@ proc play_help {} {
 # This function will only be called if this module is active.
 #
 proc status_report {} {
-  #printInfo "status_report called...";
+  # printInfo "Запрошен статус ...";
 }
 
+
+#
+# Executed when an entered command failed or have bad syntax.
+#
+proc command_failed {cmd} {
+  Module::playCoreMsg "command";
+  
+  spellWord $cmd;
+  Module::playCoreMsg "not";
+  Module::playCoreMsg "operatedf";
+}
+ 
+ 
+#
+# Executed when an unrecognized command has been received.
+#
+proc unknown_command {cmd} {
+  Module::playCoreMsg "unknown_command";
+  spellWord $cmd;
+}
+
+
+#
+# Executed when command to count nodes on the channel is called
+#
+proc count_clients {count_clients} {
+  playNumberWithUnits $count_clients "frn_connected_client"
+  playSilence 250;
+}
+
+
+#
+# Executed when the rf disable feature is activated or deactivated
+#   status    - The current status of the feature (0=deactivated, 1=activated)
+#   activate  - The requested new status of the feature
+#               (0=deactivate, 1=activate)
+#
+proc rf_disable {status activate} {
+  variable module_name;
+
+  if {$status == $activate} {
+    Module::playCoreMsg "listen_only";
+    Module::playCoreMsg [expr {$status ? "already_active" : "not_active"}];
+  } else {
+    puts "$module_name: [expr {$activate ? "Включается" : "Выключается"}]
+          режим \"только прослушивание\".";
+    Module::playCoreMsg [expr {$activate ? "activating" : "deactivating"}];
+    Module::playCoreMsg "listen_only";
+  }
+}
 
 # end of namespace
 }

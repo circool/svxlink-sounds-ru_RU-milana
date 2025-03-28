@@ -38,6 +38,8 @@ variable long_cw_id_enable      0
 variable long_announce_enable   0
 variable long_announce_file     ""
 
+variable admin_help_enable      0
+
 #
 # The ident_only_after_tx variable indicates if identification is only to
 # occur after the node has transmitted. The variable is setup below from the
@@ -60,26 +62,38 @@ variable second_tick_subscribers [list];
 #
 variable sql_rx_id "?";
 
-#
+# приветствие при включении ("на частоте работает ...") + краткий позывной CW
 # Executed when the SvxLink software is started
 #
 proc startup {} {
+  variable CFG_TYPE;
+  global mycall;
   playMsg "Core" "online"
-  send_short_ident
+  if {$CFG_TYPE == "Repeater"} {
+    playMsg "Core" "repeater";
+  } elseif {$CFG_TYPE == "Simplex"} {
+    playMsg "Core" "simplex";
+  } elseif {$CFG_TYPE == "Reflector"} {
+    playMsg "Core" "reflector";
+  }
+
+  spellWord $mycall;
 }
 
 
-#
+# модуль ... не найден
 # Executed when a specified module could not be found
 #   module_id - The numeric ID of the module
 #
 proc no_such_module {module_id} {
-  playMsg "Core" "no_such_module";
+  playMsg "Core" "module"
   playNumber $module_id;
+  playMsg "Core" "not";
+  playMsg "Core" "found";
 }
 
 
-#
+# ручная идентификация
 # Executed when a manual identification is initiated with the * DTMF code
 #
 proc manual_identification {} {
@@ -96,10 +110,17 @@ proc manual_identification {} {
   set prev_ident $epoch;
 
   playMsg "Core" "online";
-  spellWord $mycall;
+  
   if {$CFG_TYPE == "Repeater"} {
     playMsg "Core" "repeater";
+  } elseif {$CFG_TYPE == "Simplex"} {
+    playMsg "Core" "simplex";
+  } elseif {$CFG_TYPE == "Reflector"} {
+    playMsg "Core" "reflector";
   }
+
+  spellWord $mycall;
+  
   playSilence 250;
   playMsg "Core" "the_time_is";
   playTime $hour $minute;
@@ -110,7 +131,9 @@ proc manual_identification {} {
     playSilence 300;
   }
   if {$active_module != ""} {
-    playMsg "Core" "active_module";
+    playMsg "Core" "active";
+    playMsg "Core" "module";
+    
     playMsg $active_module "name";
     playSilence 250;
     set func "::";
@@ -152,17 +175,20 @@ proc send_short_ident {{hour -1} {minute -1}} {
 
   # Play voice id if enabled
   if {$short_voice_id_enable} {
-    puts "Произносится короткая голосовая идентификация"
-    spellWord $mycall;
+    # puts "Playing short voice ID"
+    
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
-    }
+    } elseif {$CFG_TYPE == "Simplex"} {
+      playMsg "Core" "simplex";
+    } 
+    spellWord $mycall;
     playSilence 500;
   }
 
   # Play announcement file if enabled
   if {$short_announce_enable} {
-    puts "Произносится короткий анонс"
+    puts "Playing short announce"
     if [file exist "$short_announce_file"] {
       playFile "$short_announce_file"
       playSilence 500
@@ -171,7 +197,7 @@ proc send_short_ident {{hour -1} {minute -1}} {
 
   # Play CW id if enabled
   if {$short_cw_id_enable} {
-    puts "Передается короткая CW идентификация"
+    puts "Playing short CW ID"
     if {$CFG_TYPE == "Repeater"} {
       set call "$mycall/R"
       CW::play $call
@@ -200,11 +226,14 @@ proc send_long_ident {hour minute} {
 
   # Play the voice ID if enabled
   if {$long_voice_id_enable} {
-    puts "Произносится длинная голосовая идентификация"
-    spellWord $mycall;
+    # puts "Playing Long voice ID"
+    
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
+    } elseif {$CFG_TYPE == "Simplex"} {
+      playMsg "Core" "simplex"
     }
+    spellWord $mycall;
     playSilence 500;
     playMsg "Core" "the_time_is";
     playSilence 100;
@@ -227,7 +256,7 @@ proc send_long_ident {hour minute} {
 
   # Play announcement file if enabled
   if {$long_announce_enable} {
-    puts "Произносится длинный анонс"
+    puts "Playing long announce"
     if [file exist "$long_announce_file"] {
       playFile "$long_announce_file"
       playSilence 500
@@ -236,7 +265,7 @@ proc send_long_ident {hour minute} {
 
   # Play CW id if enabled
   if {$long_cw_id_enable} {
-    puts "Передается длинная CW идентификация"
+    puts "Playing long CW ID"
     if {$CFG_TYPE == "Repeater"} {
       set call "$mycall/R"
       CW::play $call
@@ -266,135 +295,160 @@ proc send_rgr_sound {} {
 }
 
 
-#
+# получена пустая макрокоманда
 # Executed when an empty macro command (i.e. D#) has been entered.
 #
 proc macro_empty {} {
-  playMsg "Core" "has_empty";
+  playMsg "Core" "receivedf"; 
+  playMsg "Core" "emptyf";
   playMsg "Core" "macro";
 }
 
 
-#
+# Макрокоманда не найдена
 # Executed when an entered macro command could not be found
 #
 proc macro_not_found {} {
   playMsg "Core" "macro";
-  playMsg "Core" "not_foundf";
+  playMsg "Core" "not";
+  playMsg "Core" "foundf";
+
 }
 
 
-#
+# макрокоманда содержит ошибки
 # Executed when a macro syntax error occurs (configuration error).
 #
 proc macro_syntax_error {} {
   playMsg "Core" "macro";
   playMsg "Core" "has_error";
+
 }
 
 
-#
+# макрокоманда содержит ошибки, модуль не найден
 # Executed when the specified module in a macro command is not found
 # (configuration error).
 #
 proc macro_module_not_found {} {
-  
   playMsg "Core" "macro";
   playMsg "Core" "has_error";
-  playSilence 100
+  playSilence 100;
   playMsg "Core" "module";
-  playMsg "Core" "not_found";
+  playMsg "Core" "not";
+  playMsg "Core" "found";
 }
 
 
-#
+# не удалось включить модуль
 # Executed when the activation of the module specified in the macro command
 # failed.
 #
 proc macro_module_activation_failed {} {
-  playMsg "Core" "operation_failed";
+  
+  playMsg "Core" "not";
+  playMsg "Core" "success";
+  playMsg "Core" "turn_on";
+  playMsg "Core" "module";
 }
 
 
-#
+# невозможно включить модуль пока активен модуль ...
 # Executed when a macro command is executed that requires a module to
 # be activated but another module is already active.
 #
 proc macro_another_active_module {} {
   global active_module;
-
-  playMsg "Core" "operation_failed";
-  playMsg "Core" "active_module";
+  playMsg "Core" "not_forbidden";
+  playMsg "Core" "turn_on";
+  playMsg "Core" "module";
+  playMsg "Core" "until";
+  playMsg "Core" "active1";
+  playMsg "Core" "module";
   playMsg $active_module "name";
 }
 
 
-#
+# неизвестная команда
 # Executed when an unknown DTMF command is entered
 #   cmd - The command string
 #
 proc unknown_command {cmd} {
+  
+  playMsg "Core" "unknownf";
+  playMsg "Core" "command";
   spellWord $cmd;
-  playMsg "Core" "unknown_command";
 }
 
 
-#
+# не удалось выполнить команду ...
 # Executed when an entered DTMF command failed
 #   cmd - The command string
 #
 proc command_failed {cmd} {
+  playMsg "Core" "not";
+  playMsg "Core" "success";
+  playMsg "Core" "execute";
+  playMsg "Core" "command1";
   spellWord $cmd;
-  playMsg "Core" "operation_failed";
+  
 }
 
 
-#
+# выполняется соединение с ... 
 # Executed when a link to another logic core is activated.
 #   name  - The name of the link
 #
 proc activating_link {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "activating_link_to";
+    playMsg "Core" "processing";
+    playMsg "Core" "connection";
+    playMsg "Core" "with";
     spellWord $name;
   }
 }
 
 
-#
+# разрывается соединение с ...
 # Executed when a link to another logic core is deactivated.
 #   name  - The name of the link
 #
 proc deactivating_link {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "deactivating_link_to";
+    playMsg "Core" "disconnecting";
+    playMsg "Core" "with";
     spellWord $name;
   }
 }
 
 
-#
+# узел ... не активен
 # Executed when trying to deactivate a link to another logic core but the
 # link is not currently active.
 #   name  - The name of the link
 #
 proc link_not_active {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "link_not_active_to";
+    playMsg "Core" "link";
     spellWord $name;
+    playMsg "Core" "not";
+    playMsg "Core" "active1";
   }
 }
 
 
-#
+# линк ... уже подключен
 # Executed when trying to activate a link to another logic core but the
 # link is already active.
 #   name  - The name of the link
 #
 proc link_already_active {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "link_already_active_to";
+    playMsg "Core" "link";
     spellWord $name;
+    playMsg "Core" "already";
+    playMsg "Core" "active1";
+    
   }
 }
 
@@ -404,12 +458,7 @@ proc link_already_active {name} {
 #   is_on - Set to 1 if the transmitter is on or 0 if it's off
 #
 proc transmit {is_on} {
-  # if {$is_on} {
-  #   puts "Передатчик включен"
-  # } else {
-  #   puts "Перезатчик отключен"
-  # }
-  # puts "Turning the transmitter $is_on";
+  #puts "Turning the transmitter $is_on";
   variable prev_ident;
   variable need_ident;
   if {$is_on && ([clock seconds] - $prev_ident > 5)} {
@@ -425,12 +474,7 @@ proc transmit {is_on} {
 #
 proc squelch_open {rx_id is_open} {
   variable sql_rx_id;
-  # if {$is_open} {
-  #   set is_open_rus "открыт"
-  # } else {
-  #   set is_open_rus "закрыт"
-  # }
-  # puts "Шумоподаватель $is_open_rus на RX $rx_id";
+  #puts "The squelch is $is_open on RX $rx_id";
   set sql_rx_id $rx_id;
 }
 
@@ -444,7 +488,7 @@ proc squelch_open {rx_id is_open} {
 # return 0 to make SvxLink continue processing as normal.
 #
 proc dtmf_digit_received {digit duration} {
-  puts "Декодирована DTMF посылка \"$digit\" продолжительностью в $duration мсек";
+  puts -nonewline "получена DTMF посылка $digit продолжительностью в $duration миллисекунд";
   return 0;
 }
 
@@ -524,8 +568,8 @@ proc every_second {} {
 # Deprecated: Use the addMinuteTickSubscriber function instead
 #
 proc addTimerTickSubscriber {func} {
-  puts "*** WARNING: Вызов устаревшего обработчика событий TCL addTimerTickSubcriber."
-  puts "             Вместо этого использую addMinuteTickSubscriber"
+  puts "*** WARNING: Calling deprecated TCL event handler addTimerTickSubcriber."
+  puts "             Use addMinuteTickSubscriber instead"
   addMinuteTickSubscriber $func;
 }
 
@@ -584,7 +628,7 @@ proc checkPeriodicIdentify {} {
   }
 
   if {$long_ident_now} {
-    puts "$logic_name: Передается длинный идентификатор...";
+    puts "$logic_name: Передается полная идентификация...";
     send_long_ident $hour $minute;
     set prev_ident $now;
     set need_ident 0;
@@ -597,7 +641,7 @@ proc checkPeriodicIdentify {} {
     }
 
     if {$short_ident_now} {
-      puts "$logic_name: Передается короткий идентификатор...";
+      puts "$logic_name: Передается краткая идентификация...";
       send_short_ident $hour $minute;
       set prev_ident $now;
       set need_ident 0;
@@ -606,7 +650,7 @@ proc checkPeriodicIdentify {} {
 }
 
 
-#
+# 
 # Executed when the QSO recorder is being activated
 #
 proc activating_qso_recorder {} {
@@ -630,7 +674,8 @@ proc deactivating_qso_recorder {} {
 #
 proc qso_recorder_not_active {} {
   playMsg "Core" "qso_recorder";
-  playMsg "Core" "not_active";
+  playMsg "Core" "not";
+  playMsg "Core" "active1";
 }
 
 
@@ -640,27 +685,30 @@ proc qso_recorder_not_active {} {
 #
 proc qso_recorder_already_active {} {
   playMsg "Core" "qso_recorder";
-  playMsg "Core" "already_active";
+  playMsg "Core" "already";
+  playMsg "Core" "active1";
 }
 
 
-#
+# Q S O рекордер подключен по таймауту
 # Executed when the timeout kicks in to activate the QSO recorder
 #
 proc qso_recorder_timeout_activate {} {
-  playMsg "Core" "timeout"
-  playMsg "Core" "activating";
   playMsg "Core" "qso_recorder";
+  playMsg "Core" "connected";
+  playMsg "Core" "due_timeout"
+  
+  
 }
 
 
-#
+# Q S O рекордер отключен по таймауту
 # Executed when the timeout kicks in to deactivate the QSO recorder
 #
 proc qso_recorder_timeout_deactivate {} {
-  playMsg "Core" "timeout"
-  playMsg "Core" "deactivating";
   playMsg "Core" "qso_recorder";
+  playMsg "Core" "disconnected";
+  playMsg "Core" "due_timeout"
 }
 
 
@@ -669,7 +717,7 @@ proc qso_recorder_timeout_deactivate {} {
 #
 proc set_language {lang_code} {
   global logic_name;
-  puts "$logic_name: Установка языка $lang_code (НЕ РЕАЛИЗОВАНА)";
+  puts "$logic_name: Setting language $lang_code (NOT IMPLEMENTED)";
 
 }
 
@@ -679,7 +727,7 @@ proc set_language {lang_code} {
 #
 proc list_languages {} {
   global logic_name;
-  puts "$logic_name: Доступные языки: (НЕ РЕАЛИЗОВАНО)";
+  puts "$logic_name: Available languages: (NOT IMPLEMENTED)";
 
 }
 
@@ -693,10 +741,12 @@ proc logic_online {online} {
 
   if {$online} {
     playMsg "Core" "online";
-    spellWord $mycall;
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
+    } elseif {$CFG_TYPE == "Simplex"} {
+      playMsg "Core" "simplex";
     }
+    spellWord $mycall;
   }
 }
 
@@ -706,7 +756,7 @@ proc logic_online {online} {
 # core
 #
 proc config_updated {tag value} {
-  puts "Обновлена переменная конфигурации: $tag=$value"
+  puts "Переменная конфигурации $tag изменила значение на $value"
 }
 
 
@@ -717,8 +767,8 @@ proc config_updated {tag value} {
 #   cmd   -- The received command
 #
 proc remote_cmd_received {logic cmd} {
-  puts "Получена дистанционная команда от $logic: $cmd"
-  playDtmf "$cmd" "500" "50"
+  puts "От логического ядра $logic принята конманда $cmd"
+  #playDtmf "$cmd" "500" "50"
 }
 
 
@@ -729,10 +779,10 @@ proc remote_cmd_received {logic cmd} {
 #   tg    -- The received talkgroup
 #
 proc remote_received_tg_updated {logic tg} {
-  puts "Принята дистанционная TG от logic $logic: $tg"
-  if {$tg > 0} {
-   playDtmf "1$tg" "500" "50"
-  }
+  puts "От логического ядра $logic получена разговорная группа $tg"
+  #if {$tg > 0} {
+  #  playDtmf "1$tg" "500" "50"
+  #}
 }
 
 
@@ -795,7 +845,10 @@ if [info exists CFG_LONG_CW_ID_ENABLE] {
   set long_cw_id_enable $CFG_LONG_CW_ID_ENABLE
 }
 
-
+if [info exists CFG_ADMIN_HELP_ENABLE] {
+  set admin_help_enable $CFG_ADMIN_HELP_ENABLE
+  
+}
 # end of namespace
 }
 
