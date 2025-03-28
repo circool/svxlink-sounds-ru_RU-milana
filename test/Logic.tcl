@@ -131,7 +131,9 @@ proc manual_identification {} {
     playSilence 300;
   }
   if {$active_module != ""} {
-    playMsg "Core" "active_module";
+    playMsg "Core" "active";
+    playMsg "Core" "module";
+    
     playMsg $active_module "name";
     playSilence 250;
     set func "::";
@@ -174,10 +176,13 @@ proc send_short_ident {{hour -1} {minute -1}} {
   # Play voice id if enabled
   if {$short_voice_id_enable} {
     # puts "Playing short voice ID"
-    spellWord $mycall;
+    
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
-    }
+    } elseif {$CFG_TYPE == "Simplex"} {
+      playMsg "Core" "simplex";
+    } 
+    spellWord $mycall;
     playSilence 500;
   }
 
@@ -222,10 +227,13 @@ proc send_long_ident {hour minute} {
   # Play the voice ID if enabled
   if {$long_voice_id_enable} {
     # puts "Playing Long voice ID"
-    spellWord $mycall;
+    
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
+    } elseif {$CFG_TYPE == "Simplex"} {
+      playMsg "Core" "simplex"
     }
+    spellWord $mycall;
     playSilence 500;
     playMsg "Core" "the_time_is";
     playSilence 100;
@@ -733,10 +741,12 @@ proc logic_online {online} {
 
   if {$online} {
     playMsg "Core" "online";
-    spellWord $mycall;
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
+    } elseif {$CFG_TYPE == "Simplex"} {
+      playMsg "Core" "simplex";
     }
+    spellWord $mycall;
   }
 }
 
@@ -757,7 +767,7 @@ proc config_updated {tag value} {
 #   cmd   -- The received command
 #
 proc remote_cmd_received {logic cmd} {
-  puts "Модулем $logic получена команда $cmd"
+  puts "От логического ядра $logic принята конманда $cmd"
   #playDtmf "$cmd" "500" "50"
 }
 
@@ -769,7 +779,7 @@ proc remote_cmd_received {logic cmd} {
 #   tg    -- The received talkgroup
 #
 proc remote_received_tg_updated {logic tg} {
-  puts "Remote TG received from logic $logic: $tg"
+  puts "От логического ядра $logic получена разговорная группа $tg"
   #if {$tg > 0} {
   #  playDtmf "1$tg" "500" "50"
   #}

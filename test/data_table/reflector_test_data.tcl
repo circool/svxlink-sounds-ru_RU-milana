@@ -1,6 +1,7 @@
 set dataTests {
 	
 	{"ReflectorLogic::reflector_connection_status_update" "0" "рефлектор отключен"}
+	{"ReflectorLogic::reflector_connection_status_update" "0" "рефлектор отключен"}
 	{"ReflectorLogic::reflector_connection_status_update" "1" "рефлектор подключен"}
 	{"ReflectorLogic::report_tg_status" "рефлектор отключен предыдущая разговорная группа ноль"}
 	{"ReflectorLogic::tg_selected" "111" "9999" "выбрана разговорная группа сто одиннадцать"}

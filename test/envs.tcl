@@ -1,25 +1,3 @@
-global argv
-
-
-variable report_ctcss "88.5"
-variable active_module "EchoLink"
-variable loaded_modules "ModuleEchoLink,ModuleFrn,ModuleMetarInfo,ModuleHelp,ModuleParrot"
-
-set argc [llength $args]
-set arg1 [lindex $args 0]
-
-#  langdir
-variable langdir
-set langdir "../ru_RU"
-
-variable logic_name "ReflectorLogic"
-
-# Процедуры глобального пространства имен
-# if {[info proc ::$arg1] ne ""} {
-# 	::$arg1 {*}[lrange $args 1 end]	
-# 	return
-# }
-
 
 
 namespace eval DtmfRepeater {
@@ -52,10 +30,7 @@ namespace eval Logic {
 	if {![info exists CFG_TIME_FORMAT]} {
 		set CFG_TIME_FORMAT 24
 	}
-	variable ::mycall "R2ADU"
-	variable CFG_TYPE "Simplex"
-	variable loaded_modules "ModuleEchoLink,ModuleFrn,ModuleMetarInfo,ModuleHelp,ModuleParrot"
-	variable list_languages {ru_RU en_EN}	
+	
 	
 }	
 source "./Logic.tcl"
