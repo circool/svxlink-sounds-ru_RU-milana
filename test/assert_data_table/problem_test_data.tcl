@@ -1,7 +1,5 @@
 set dataTests {
-	{"no_such_module" "2" "модуль два не найден"}
-	{"announce_airport" "UUEE" "Аэропорт Москва Шереметьево"}
-	{"is_receiving" "RX1" "123" "команда --- не удалась"}
+	
 }	
 # 
 

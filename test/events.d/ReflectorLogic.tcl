@@ -305,7 +305,7 @@ proc tg_qsy {new_tg old_tg} {
   #puts "### tg_qsy"
   set prev_announce_time [clock seconds]
   set prev_announce_tg $new_tg
-  playMsg "Core" "operatedm"
+  playMsg "Core" "executedm"
   playMsg "Core" "qsy"
   playMsg "Core" "in"
   playMsg "Core" "talk_group1"
@@ -332,7 +332,7 @@ proc tg_qsy_on_sql {tg} {
   playMsg "Core" "in"
   playMsg "Core" "talk_group1"
   say_talkgroup $tg
-  playMsg "Core" "operatedm"
+  playMsg "Core" "executedm"
   playMsg "Core" "due_sql"
 
 }

@@ -33,4 +33,7 @@ set dataTests {
 	{"visibility" "more_than" "10" "unit_km" "видимость более десяти километров"}
 	{"visibility" "10" "unit_kms" "видимость десять километров"}
 	{"announce_airport" "UUEE" "Аэропорт Москва Шереметьево"}	
+	{"no_airport_defined" "Аэропорт не указан"}
+	{"no_such_airport" "нет такого аэропорта"}
+	{"metar_not_valid" "метеосводка не достоверная"}
 }

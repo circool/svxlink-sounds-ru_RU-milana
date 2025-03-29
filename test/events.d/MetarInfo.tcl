@@ -106,27 +106,23 @@ proc metar {input} {
 
 # no airport defined
 proc no_airport_defined {} {
-   playMsg "no";
    playMsg "airport";
-   playMsg "defined";
+   Module::playCoreMsg "not";
+   
+   playMsg  "define";
    playSilence 200;
 }
 
 
 # no airport defined
 proc no_such_airport {} {
-   playMsg "no";
-   playMsg "such";
-   playMsg "airport";
+   playMsg "no_such_airport";
    playSilence 200;
 }
 
 
 # METAR not valid
 proc metar_not_valid {} {
-  # playMsg "metarinformation";
-  # playMsg "not";
-  # playMsg "valid";
   playMsg "metar_not_valid"
   playSilence 200;
 }
@@ -188,8 +184,6 @@ proc visibility {args} {
                 if {[string index $next_arg end] eq "s"} {
                     set next_arg [string range $next_arg 0 end-1]
                 }
-                # удалить лидирующие нули перед произношением чисел
-                # regsub {^0+(\d+)} $arg {\1} arg 
                 
                 playNumberUnit $arg "${next_arg}$suffix"
                 playUnit "${next_arg}$suffix" $arg
@@ -219,14 +213,12 @@ proc visibility {args} {
 # temperature +
 proc temperature {temp} {
   playMsg "temperature";
-  # playSilence 100;
   if {$temp == "not"} {
-    playMsg "not";
+    Module::playCoreMsg "not";
     playMsg "reported";
   } else {
     playNumberUnit $temp "unit_degree";
     playUnit "unit_degree" $temp;
-    # playSilence 100;
   }
   playSilence 200;
 }
@@ -235,14 +227,12 @@ proc temperature {temp} {
 # dewpoint +
 proc dewpoint {dewpt} {
   playMsg "dewpoint";
-  # playSilence 100;
   if {$dewpt == "not"} {
-    playMsg "not";
+    Module::playCoreMsg "not";
     playMsg "reported";
   } else {
     playNumberUnit $dewpt "unit_degree";
     playUnit "unit_degree" $dewpt;
-    # playSilence 100;
   }
   playSilence 200;
 }
@@ -275,7 +265,6 @@ proc nospeci {} {
 # peakwind
 proc peakwind1 {val} {
   playMsg "pk_wnd";
-  # playSilence 100;
   # удаляем лидирующие нули поскольку передаем число без указания единиц
   regsub {^0+(\d+)} $val {\1} val
   playNumberUnit $val "male";
@@ -285,35 +274,26 @@ proc peakwind1 {val} {
 
 # wind
 proc wind {deg {vel 0 } {unit 0} {gusts 0} {gvel 0}} {
-  # puts "\nПолучено deg=$deg vel=$vel unit=$unit gusts=$gusts gvel=$gvel"
-  playMsg "wind";
-  
+  playMsg "wind"; 
   # удалить множественный признак для е/и кроме unit_mps
   if {$unit ne "unit_mps"} {
     set unit [string trimright $unit "s"]
     set gvel [string trimright $gvel "s"]
   }
   
-  # if {$vel > 0} {
-  #   regsub {^0+(\d+)} $vel {\1} vel
-  # }
 
   if {$deg == "calm"} {
     playMsg "calm";
   } elseif {$deg == "variable"} {
-    playMsg "variable";
-    # playSilence 200;
-    
+    playMsg "variable";    
     playNumberUnit $vel $unit;
     playUnit $unit $vel ;
   } else {
-    # regsub {^0+(\d+)} $deg {\1} deg
     playMsg "at"
     playNumberUnit $deg "unit_degree";
     playUnit "unit_degree" $deg;
     playSilence 100;
     playMsg "wspd";
-    # playSilence 100;
     playNumberUnit $vel $unit;
     playUnit $unit $vel ;
     
@@ -349,10 +329,6 @@ proc windvaries {from to} {
    playSilence 50;
    playMsg "varies_from";
    playSilence 50;
-   
-  #  regsub {^0+(\d+)} $from {\1} from
-  #  regsub {^0+(\d+)} $to {\1} to
-
    playNumberUnit $from "unit_degree_range";
    playSilence 50;
 
@@ -368,14 +344,10 @@ proc windvaries {from to} {
 # Peak WIND +? это пиковый ветер 280 градусов со скоростью 32 узла, зарегистрированный на [HH часов] mm минут
 proc peakwind {deg kts hh mm} {
   playMsg "pk_wnd";
-  # 
-  #  playMsg "dir";
-  #  playSilence 100;
    playMsg "at";
    playNumberUnit $deg "unit_degree";
    playUnit "unit_degree" $deg;
    playSilence 100;
-  #  playMsg "from";
    playMsg "with_speed";
    playNumberUnit $kts "unit_kt";
    playUnit "unit_kt" $kts;
@@ -387,7 +359,6 @@ proc peakwind {deg kts hh mm} {
       playUnit "hour" $hh;
       
     }
-  #  playMsg "pk_wnd";
    playNumberUnit $mm "minute";
    playUnit "minute" $mm;
   playMsg "utc";
@@ -420,7 +391,6 @@ proc rvr args {
    playMsg "rwy";
    foreach item $args {
      if [regexp {(\d+)} $item] {
-      #  sayNumber $item;
       playNumberUnit $item "male_range";
      } else {
        playMsg $item;
@@ -433,20 +403,13 @@ proc rvr args {
 
 # airport is closed due to snow
 proc snowclosed {} {
-  #  playMag "aiport";
-  #  playMag "closed";
-  #  playMsg "due_to"
-  #  playMsg "sn";
-   playMsg "airport_closed_due_to_sn"
-   playSilence 200;
+  playMsg "airport_closed_due_to_sn"
+  playSilence 200;
 }
 
 
 # RWY is clear
 proc all_rwy_clear {} {
-  # playMsg "all";
-  # playMsg "runways";
-  # playMsg "clr";
   playMsg "all_runways_clr";
   playSilence 200;
 }
@@ -523,15 +486,12 @@ proc trend args {
 
 # clouds with arguments
 proc clouds {obs height {cbs ""}} {
-  # playMsg "clouds"
   playMsg $obs;
   if {[string length $cbs] > 0} {
     playMsg $cbs;
   }
-  # playSilence 100;
   playMsg "altimeter"
   playNumberUnit $height "unit_feet";
-  #playSilence 100;
   playUnit "unit_feet" $height;
  
   playSilence 200;
@@ -567,8 +527,6 @@ proc max_daytemp {deg time} {
   playSilence 150;
   playMsg "at";
   playSilence 50;
-  
-  # regsub {^0(\d)} $time {\1} time
   playNumberUnit $time "hour";
   playUnit "hour" $time
   playSilence 200;
@@ -576,9 +534,6 @@ proc max_daytemp {deg time} {
 
 
 # min day temperature
-
-
-
 
 proc min_daytemp {deg time} {
   playMsg "predicted";
@@ -593,7 +548,6 @@ proc min_daytemp {deg time} {
   playSilence 150;
   playMsg "at";
   playSilence 50;
-  # regsub {^0(\d)} $time {\1} time
   playNumberUnit $time "hour";
   playSilence 200;
 }
@@ -607,9 +561,6 @@ proc rmk_maxtemp {val} {
   playMsg "last1";
   playNumberUnit 6 "hour";
   playUnit "hour" 6;
-  # if {$val < 0} {
-  #   playMsg "minus";
-  # }
   playNumberUnit $val "unit_degree";
   playUnit "unit_degree" $val;
   playSilence 200;
@@ -645,13 +596,9 @@ proc rmk_pressure {val args} {
   playMsg "next1";
   playNumberUnit 3 "hour";
   playUnit "hour" 3;
-  # playSilence 150;
   playMsg "pressure";
   playNumberUnit $val "unit_mb";
   playUnit "unit_mb" $val;
-  # playSilence 150;
-  # playMsg "unit_mbs";
-  # playSilence 250;
 
   foreach item $args {
      if [regexp {(\d+)} $item] {
@@ -659,7 +606,6 @@ proc rmk_pressure {val args} {
      } else {
        playMsg $item;
      }
-    #  playSilence 100;
   }
   playSilence 200;
 }
@@ -674,11 +620,8 @@ proc rmk_precipitation {hour val} {
     playMsg "last1";
   }
   
-  # regsub {^0(\d)} $hour {\1} hour
   playNumberUnit $hour "hour";
   playUnit "hour" $hour;
-
-  # playSilence 150;
   playNumberUnit $val "unit_inch";
   playUnit "unit_inch" $val;
   playSilence 200;
@@ -704,19 +647,8 @@ proc rmk_minmaxtemp {max min} {
   playMsg "maximum";
   playMsg "daytime";
   playMsg "temperature";
-  
-  # if { $max < 0} {
-  #    playMsg "minus";
-  #    set max [string trimleft $max "-"];
-  # }
   playNumberUnit $min "unit_degree";
   playMsg "unit_degree" $min;
-
-  # playMsg "minimum";
-  # if { $min < 0} {
-  #    playMsg "minus";
-  #    set min [string trimleft $min "-"];
-  # }
   playNumberUnit $max "unit_degree";
   playMsg "unit_degree" $max;
   playSilence 200;
@@ -731,8 +663,6 @@ proc rmk_tempdew {temp dewpt} {
   playMsg "temperature";
   playNumberUnit $temp "unit_degree";
   playUnit "unit_degree" $temp  ;
-  # playSilence 200;
-  # playMsg "and"
   playMsg "dewpoint";
   playNumberUnit $dewpt "unit_degree";
   playUnit "unit_degree" $dewpt;
@@ -744,7 +674,7 @@ proc rmk_tempdew {temp dewpt} {
 proc windshift {val} {
   playMsg "wshft";
   playSilence 100;
-  playMsg "in";
+  Module::playCoreMsg "in";
   playSilence 100;
   
   playNumberUnit $val "hour";
@@ -760,122 +690,6 @@ proc qfe {val} {
   playUnit "unit_hPa" $val;
   playSilence 200;
 }
-
-
-# Пример: runwaystate runway 06 center damp contamination 51 to 100 percent deposit_depth less_than 1 unit_mm  friction_coefficient 0.45
-
-# Начало пврвметров всегда (1-2- и возможно 3-й аргументы): runway 06 или runway 06 center
-# блок по паттерну "runway" "число" "[center|left|right]"
-# обрабатывать так:
-# playMsg "runway"
-# SpeelNumber "число"
-# Если есть [center|left|right] -> playMsg center|left|right -> перейти к 4-му параметру, если нет - к 3-му
-#
-# Последующие параметры:  
-# блоки по патерну  ("less_or_equal" или "less") "10" "percent"
-# обрабатывать так:
-# playMsg "less_or_equal" или "less"
-# playNumberUnit 10 "percent_range";
-# playUnit "percent_range" 10;
-
-# блоки по патерну "51" "to" "100" "percent"
-# обрабатывать так:
-
-# playNumberUnit 51 "percent_range";
-# playMsg "to"
-# playNumberUnit 100 "percent_range";
-# playUnit "percent_range" 100;
-
-# если за числом идет параметр начинающийся на "unit_", вызывать блок 
-# блоки по патерну [число] "unit_*" 
-# обрабатывать так:
-# playNumberUnit $число "unit_*";
-# playUnit "unit_*" $число;
-
-# блоки до/после паттерна обрабатывать так:
-# если параметр это слово, вызывать playMsg
-# runwaystate
-# proc runwaystate args {
-    
-#     set len [llength $args]
-#     set i 0
-#     while {$i < $len} {
-#         set current [lindex $args $i]
-        
-#         # Паттерн ВВП \d\d
-#         if {[string match "runway" $current] && $i + 1 < $len} {
-#           set unit [lindex $args $i+1]
-#           playMsg "runway"
-#           spellNumber $unit
-#           incr i 3
-#         }
-
-
-#         # Паттерн 1: "less_or_equal"/"less" + число + ("unit_*" или "percent")
-#         if {[string match "less*" $current] && $i + 2 < $len} {
-#             set num [lindex $args $i+1]
-#             set unit [lindex $args $i+2]
-#             if {[string is integer -strict $num] && ($unit eq "percent" || [string match "unit_*" $unit])} {
-#                 # Генерация суффикса для единицы
-#                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent_range" : "${unit}_range"}]
-#                 # puts "DEBUG Паттерн 1: $current $num $unit → $unit_suffix"
-#                 playMsg $current
-#                 playNumberUnit $num $unit_suffix
-#                 playUnit $unit_suffix $num
-#                 incr i 3
-#                 playSilence 100
-#                 continue
-#             }
-#         }
-        
-#         # Паттерн 2: число + "to" + число + ("unit_*" или "percent")
-#         if {[string is integer -strict $current] && $i + 3 < $len} {
-#             set next1 [lindex $args $i+1]
-#             set next2 [lindex $args $i+2]
-#             set next3 [lindex $args $i+3]
-#             if {$next1 eq "to" && [string is integer -strict $next2] && ($next3 eq "percent" || [string match "unit_*" $next3])} {
-#                 playMsg "from"
-#                 # Генерация суффикса для единицы
-#                 set unit_suffix [expr {$next3 eq "percent" ? "unit_percent_range" : "${next3}_range"}]
-#                 # puts "DEBUG Паттерн 2: $current to $next2 $next3 → $unit_suffix"
-#                 playNumberUnit $current $unit_suffix
-#                 playMsg "to"
-#                 playNumberUnit $next2 $unit_suffix
-#                 playUnit $unit_suffix $next2
-#                 incr i 4
-#                 playSilence 100
-#                 continue
-#             }
-#         }
-        
-#         # Паттерн 3: число + ("unit_*" или "percent")
-#         if {[string is integer -strict $current] && $i + 1 < $len} {
-#             set unit [lindex $args $i+1]
-#             if {$unit eq "percent" || [string match "unit_*" $unit]} {
-#                 # Генерация суффикса для единицы
-#                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent" : $unit}]
-#                 # puts "DEBUG Паттерн 3: $current $unit → $unit_suffix"
-#                 playNumberUnit $current $unit_suffix
-#                 playUnit $unit_suffix $current
-#                 incr i 2
-#                 playSilence 100
-#                 continue
-#             }
-#         }
-        
-        
-#         # Одиночные элементы
-#         if {[string is double -strict $current] || [string is integer -strict $current]} {
-#             playNumberUnit $current "male"
-#         } else {
-#             playMsg $current
-#         }
-#         playSilence 100
-#         incr i
-#     }
-#     playSilence 200
-# }
-
 
 proc runwaystate args {
     set len [llength $args]
@@ -955,15 +769,6 @@ proc runwaystate args {
     }
     playSilence 200
 }
-
-
-
-
-
-
-
-
-
 
 # output numbers
 proc sayNumber { number } {
@@ -1053,7 +858,6 @@ proc airports args {
          spellWord $item;
        }
      }
-    #  playSilence 100;
   }
   playSilence 200;
 }

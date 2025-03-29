@@ -100,7 +100,7 @@ proc command_failed {cmd} {
   
   spellWord $cmd;
   Module::playCoreMsg "not";
-  Module::playCoreMsg "operatedf";
+  Module::playCoreMsg "executedf";
 }
  
  
@@ -108,7 +108,8 @@ proc command_failed {cmd} {
 # Executed when an unrecognized command has been received.
 #
 proc unknown_command {cmd} {
-  Module::playCoreMsg "unknown_command";
+  Module::playCoreMsg "unknownf";
+  Module::playCoreMsg "command";
   spellWord $cmd;
 }
 
@@ -130,16 +131,24 @@ proc count_clients {count_clients} {
 #
 proc rf_disable {status activate} {
   variable module_name;
-
-  if {$status == $activate} {
-    Module::playCoreMsg "listen_only";
-    Module::playCoreMsg [expr {$status ? "already_active" : "not_active"}];
-  } else {
-    puts "$module_name: [expr {$activate ? "Включается" : "Выключается"}]
-          режим \"только прослушивание\".";
-    Module::playCoreMsg [expr {$activate ? "activating" : "deactivating"}];
-    Module::playCoreMsg "listen_only";
+  Module::playCoreMsg "listen_only"; 
+  if {$status == $activate } {
+    Module::playCoreMsg "already"
   }
+  Module::playCoreMsg [expr {$activate ? "active1" : "disconnected"}];
+
+
+  # if {$status == $activate} {
+  #   Module::playCoreMsg "listen_only";
+  #   Module::playCoreMsg "already";
+  #   Module::playCoreMsg [expr {$status ? "active1" : "disconnected"}];
+  
+  # } else {
+  #   puts "$module_name: [expr {$activate ? "Включается" : "Выключается"}]
+  #         режим \"только прослушивание\".";
+  #   Module::playCoreMsg [expr {$activate ? "activating" : "deactivating"}];
+  #   Module::playCoreMsg "listen_only";
+  # }
 }
 
 # end of namespace

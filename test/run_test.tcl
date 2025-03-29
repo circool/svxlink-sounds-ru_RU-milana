@@ -5,14 +5,14 @@ source "./assert_data_table/data_files_specs.tcl"
 
 # режим тестирования
 set ::debugMode 0
-set ::debug_module "EchoLink"
+set ::debug_module "MetarInfo"
 
 
-variable active_module "EchoLink"
+variable active_module "MetarInfo"
 
 # различные переменные
 set mycall "R2ADU"
-set report_ctcss "88.9"
+set report_ctcss "88.5"
 variable loaded_modules "ModuleEchoLink ModuleFrn ModuleMetarInfo ModuleHelp ModuleParrot"
 set langdir "../ru_RU"
 variable list_languages {ru_RU en_EN}

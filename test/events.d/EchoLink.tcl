@@ -349,9 +349,10 @@ proc cbc_aborted {} {
 # list
 #
 proc cbc_index_out_of_range {idx} {
-  playNumber $idx;
-  playSilence 50;
-  playMsg "idx_out_of_range";
+  playMsg "index"
+  playNumberUnit $idx "male";
+  # playSilence 50;
+  playMsg "out_of_range";
 }
 
 
@@ -397,7 +398,7 @@ proc dbc_list {call_list} {
 # Executed when the disconnect by callsign function is manually aborted
 #
 proc dbc_aborted {} {
-  # playMsg "disconnect_by_callsign";
+  playMsg "disconnect_by_callsign";
   
   Module::playCoreMsg "aborted";
 }
@@ -408,9 +409,9 @@ proc dbc_aborted {} {
 # list
 #
 proc dbc_index_out_of_range {idx} {
-  playNumber $idx;
-  playSilence 50;
-  playMsg "idx_out_of_range";
+  playMsg "index"
+  playNumberUnit $idx "male";
+  playMsg "out_of_range";
 }
 
 
@@ -421,8 +422,6 @@ proc dbc_index_out_of_range {idx} {
 proc dbc_timeout {} {
   Module::playCoreMsg "connection";
   Module::playCoreMsg "aborted";
-  # playMsg "disconnect_by_callsign";
-
   Module::playCoreMsg "due_timeout";
 }
 
@@ -452,7 +451,7 @@ proc command_failed {cmd} {
   Module::playCoreMsg "command";
   spellWord $cmd;
   Module::playCoreMsg "not"
-  Module::playCoreMsg "operatedf";
+  Module::playCoreMsg "executedf";
 }
 
 
@@ -475,12 +474,11 @@ proc unknown_command {cmd} {
 #
 proc listen_only {status activate} {
   variable module_name;
-  Module::playCoreMsg "listen_only";
-  
+  Module::playCoreMsg "listen_only"; 
   if {$status == $activate } {
     Module::playCoreMsg "already"
   }
-  Module::playCoreMsg [expr {$activate ? "activating" : "deactivating"}];
+  Module::playCoreMsg [expr {$activate ? "active1" : "disconnected"}];
 }
 
 
@@ -585,7 +583,10 @@ proc reject_remote_connection {perm} {
 # Executed when the inactivity timer times out
 #
 proc remote_timeout {} {
-  playMsg "timeout";
+  Module::playCoreMsg "remote"
+  Module::playCoreMsg "connection"
+  Module::playCoreMsg "aborted"
+  Module::playCoreMsg "due_timeout";
   playSilence 1000;
 }
 
