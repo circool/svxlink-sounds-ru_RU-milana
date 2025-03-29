@@ -19,13 +19,13 @@ namespace eval Logic {
 		set minute [clock format $current_time -format "%M"]
 
 		# Сообщить что программа запущена, передать короткий анонс и сообщить текущее время
-		# playMsg "Core" "online_short"
-		# spellWord $mycall
-		# send_short_ident
-		# playSilence 250;
-		# playMsg "Core" "the_time_is";
-		# playTime $hour $minute;
-		# playSilence 500;
+		playMsg "Core" "online_short"
+		spellWord $mycall
+		send_short_ident
+		playSilence 250;
+		playMsg "Core" "the_time_is";
+		playTime $hour $minute;
+		playSilence 500;
 
 		puts "Программа запущена"
 
@@ -46,11 +46,12 @@ namespace eval Logic {
 		regexp {([1-5]?\d)$} [clock format $epoch -format "%M"] -> minute;
 		set prev_ident $epoch;
 
-		# playMsg "Core" "online_short";
-		# spellWord $mycall;
+		playMsg "Core" "online_short";
 		if {$CFG_TYPE == "Repeater"} {
 			playMsg "Core" "repeater";
 		}
+		spellWord $mycall;
+		
 		playSilence 250;
 
 		playMsg "Core" "the_time_is";
@@ -63,8 +64,6 @@ namespace eval Logic {
 			playSilence 300;
 		}
 		
-
-
 		if {$active_module != ""} {
 			playMsg "Core" "active_module";
 			playMsg $active_module "name";
@@ -92,8 +91,4 @@ namespace eval Logic {
 			}
 		}
 	}
-
-	
-	
-
 }

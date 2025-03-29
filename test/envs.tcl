@@ -1,4 +1,8 @@
+puts "loading enveropment"
 
+
+
+source "./events.d/locale.tcl"
 
 namespace eval DtmfRepeater {
 	variable CFG_ID "4";	
@@ -22,22 +26,16 @@ namespace eval Help {
 }
 source "./events.d/Help.tcl"
 
-# source "./locale.tcl"
-
 namespace eval Logic {
 	variable CFG_TIME_FORMAT
 	variable CFG_PHONETIC_SPELLING 1
 	if {![info exists CFG_TIME_FORMAT]} {
 		set CFG_TIME_FORMAT 24
 	}
-	
-	
 }	
 source "./events.d/Logic.tcl"
 
-namespace eval CW {
-
-}
+# namespace eval CW {}
 source "./events.d/CW.tcl"
 
 namespace eval MetarInfo {
@@ -62,42 +60,38 @@ source "./events.d/PropagationMonitor.tcl"
 
 set logic_name "ReflectorLogic"
 namespace eval ReflectorLogic {
-	# $logic_name <== ReflectorLogic
-	# variable CFG_ID 10
+	variable CFG_ID "9"
 	variable reflector_connection_established 0
 }
 source "./events.d/ReflectorLogic.tcl"
 
 set logic_name "RepeaterLogic"
-namespace eval RepeaterLogic {
-	# $logic_name <== RepeaterLogic
-}
+# namespace eval RepeaterLogic {}
 source "./events.d/RepeaterLogic.tcl"
 
 set logic_name "SimplexLogic"
-namespace eval SimplexLogic {
-	# $logic_name <== SimplexLogic
-}
+# namespace eval SimplexLogic {}
 source "./events.d/SimplexLogic.tcl"
 
-namespace eval SelCall {
-
-}
+# namespace eval SelCall {}
 source "./events.d/SelCall.tcl"
 
 namespace eval SelCallEnc {
-	variable CFG_ID 6
+	variable CFG_ID "6"
 }
 source "./events.d/SelCallEnc.tcl"
 
 
 
 namespace eval TclVoiceMail {
-	variable CFG_ID 3
+	variable CFG_ID "3"
 }
 source "./events.d/TclVoiceMail.tcl"
 
 namespace eval Trx {
-	variable CFG_ID 8
+	variable CFG_ID "8"
 }
 source "./events.d/Trx.tcl"
+
+# variable script_path ""
+# source "./events.tcl"

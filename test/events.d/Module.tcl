@@ -9,6 +9,9 @@
 #
 namespace eval Module {
 
+proc playCoreMsg {msg} {
+	playMsg "Core" $msg
+}
 
 # включается модуль ...
 # Executed when a module is being activated
@@ -55,6 +58,16 @@ proc play_help {module_name} {
   playSubcommands $module_name help_subcmd "sub_commands_are"
 }
 
+# proc playSubcommands {module_name help_subcmd help_anounce} {
+#     playMsg $module_name "help" 
+#     playMsg "Core" $help_anounce
+# 	  playSilence 100
+# 	  playMsg $module_name $help_subcmd
+# }
+
+proc playCoreMsg {msg} {
+	playMsg "Core" $msg
+}
 
 # End of namespace
 }

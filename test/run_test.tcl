@@ -1,21 +1,31 @@
 #!/usr/bin/env tclsh
-global argv debugMode module_name CFG_TYPE logic_name mycall report_ctcss langdir debug_module
+global argv debugMode module_name module_list CFG_TYPE logic_name mycall report_ctcss langdir debug_active_module showPauses
 # описание массивов для тестирования
 source "./assert_data_table/data_files_specs.tcl"
 
 # режим тестирования
-set ::debugMode 0
-set ::debug_module "MetarInfo"
+set ::debugMode 1
+set ::showPauses 0
+set ::debug_active_module 1
 
 
-variable active_module "MetarInfo"
+variable active_module "EchoLink"
 
 # различные переменные
 set mycall "R2ADU"
 set report_ctcss "88.5"
 variable loaded_modules "ModuleEchoLink ModuleFrn ModuleMetarInfo ModuleHelp ModuleParrot"
+set module_list {
+  0 "Help"
+  1 "Parrot"
+  2 "EchoLink"
+  5 "MetarInfo"
+  7 "Frn"
+}
+
 set langdir "../ru_RU"
 variable list_languages {ru_RU en_EN}
+
 
 source "./envs.tcl"
 source "./mocks.tcl"
@@ -30,42 +40,7 @@ source "test_routines.tcl"
 # Основной код
 set testFailed 0
 
-# Процедура для запуска тестов из файла
-proc runTestsFromFile {file { logic ""} } {   
-    global debugMode testFailed active_module logic_name
-    set currentTestFailed 0
 
-    if {[file exists $file]} {
-        puts -nonewline "\nОбрабатываю логику \033\[33m$logic \033\[0mиз файла $file. "
-        source $file
-        set count [llength $dataTests]
-        puts -nonewline "Найдено $count тестовых условий. "
-        
-        foreach testCase $dataTests {
-            set args [lrange $testCase 0 end-1]
-            set expected [lindex $testCase end]
-            
-            # Заменяем имя процедуры с учетом active_module
-            set procName [lindex $args 0]
-            set args [lreplace $args 0 0 "${logic}::${procName}"]
-            
-            if {[runTest $args $expected]} {
-                set currentTestFailed 1
-                set ::testFailed 1
-            }
-
-            
-        }
-    } else {
-        puts "\033\[31mФайл $file не найден.\033\[0m"
-        set currentTestFailed 1
-        set ::testFailed 1
-    }
-
-    if {!$currentTestFailed} {
-        puts "\033\[32mТест пройден успешно\033\[0m"
-    }
-}
 
 # выбираем что запускать
 if {$debugMode} {
@@ -75,8 +50,8 @@ if {$debugMode} {
         runTestsFromFile $file
     }
 
-    if { $debug_module ne "" } {
-        switch $debug_module {
+    if { $debug_active_module } {
+        switch $active_module {
             "MetarInfo" {
                 set moduleFileList $moduleMetarInfoFiles
             }

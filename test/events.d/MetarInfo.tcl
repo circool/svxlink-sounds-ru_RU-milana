@@ -107,8 +107,7 @@ proc metar {input} {
 # no airport defined
 proc no_airport_defined {} {
    playMsg "airport";
-   Module::playCoreMsg "not";
-   
+   Module::playCoreMsg "not";  
    playMsg  "define";
    playSilence 200;
 }
@@ -217,8 +216,7 @@ proc temperature {temp} {
     Module::playCoreMsg "not";
     playMsg "reported";
   } else {
-    playNumberUnit $temp "unit_degree";
-    playUnit "unit_degree" $temp;
+    playNumberWithUnit $temp "unit_degree";
   }
   playSilence 200;
 }
@@ -231,8 +229,7 @@ proc dewpoint {dewpt} {
     Module::playCoreMsg "not";
     playMsg "reported";
   } else {
-    playNumberUnit $dewpt "unit_degree";
-    playUnit "unit_degree" $dewpt;
+    playNumberWithUnit $dewpt "unit_degree";
   }
   playSilence 200;
 }
@@ -241,8 +238,7 @@ proc dewpoint {dewpt} {
 # sea level pressure +
 proc slp {slp} {
   playMsg "slp";
-  playNumberUnit $slp "unit_hPa";
-  playUnit "unit_hPa" $slp;
+  playNumberWithUnit $slp "unit_hPa";
   playSilence 200;
 }
 
@@ -281,29 +277,24 @@ proc wind {deg {vel 0 } {unit 0} {gusts 0} {gvel 0}} {
     set gvel [string trimright $gvel "s"]
   }
   
-
   if {$deg == "calm"} {
     playMsg "calm";
   } elseif {$deg == "variable"} {
     playMsg "variable";    
-    playNumberUnit $vel $unit;
-    playUnit $unit $vel ;
+    playNumberWithUnit $vel $unit;
   } else {
     playMsg "at"
-    playNumberUnit $deg "unit_degree";
-    playUnit "unit_degree" $deg;
+    playNumberWithUnit $deg "unit_degree";
+ 
     playSilence 100;
     playMsg "wspd";
-    playNumberUnit $vel $unit;
-    playUnit $unit $vel ;
-    
+    playNumberWithUnit $vel $unit;
 
     if {$gusts > 0} {
       playSilence 100;
       playMsg "gusts_up";
       # regsub {^0+(\d+)} $gusts {\1} gusts
-      playNumberUnit $gusts "${gvel}_range";
-      playUnit "${gvel}_range" $gusts;
+      playNumberWithUnit $gusts "${gvel}_range";
     }
   playSilence 200;
   }
@@ -334,9 +325,7 @@ proc windvaries {from to} {
 
    playMsg "to";
   #  playSilence 50;
-   playNumberUnit $to "unit_degree_range";
-
-   playUnit "unit_degree" $to;
+   playNumberWithUnit $to "unit_degree_range";
    playSilence 200;
 }
 
@@ -345,24 +334,20 @@ proc windvaries {from to} {
 proc peakwind {deg kts hh mm} {
   playMsg "pk_wnd";
    playMsg "at";
-   playNumberUnit $deg "unit_degree";
-   playUnit "unit_degree" $deg;
+   playNumberWithUnit $deg "unit_degree";
+  #  playUnit "unit_degree" $deg;
    playSilence 100;
    playMsg "with_speed";
-   playNumberUnit $kts "unit_kt";
-   playUnit "unit_kt" $kts;
+   playNumberWithUnit $kts "unit_kt";
+  #  playUnit "unit_kt" $kts;
    playSilence 100;
    
    playMsg "fixed_at";
    if {$hh != "XX"} {
-      playNumberUnit $hh "hour";
-      playUnit "hour" $hh;
-      
+      playNumberWithUnit $hh "hour";      
     }
-   playNumberUnit $mm "minute";
-   playUnit "minute" $mm;
-  playMsg "utc";
-
+   playNumberWithUnit $mm "minute";
+   playMsg "utc";
    playSilence 200;
 }
 
@@ -380,9 +365,7 @@ proc ceilingvaries {from to} {
    playMsg "to";
    playSilence 100;
    set to [expr {int($to)*100}];
-   playNumberUnit $to "unit_feet_range";
-
-   playUnit "unit_feet_range" $to;
+   playNumberWithUnit $to "unit_feet_range";
    playSilence 200;
 }
 
@@ -435,8 +418,7 @@ proc utime {utime} {
    set part1 [string range $utime 0 1]  
    set part2 [string range $utime 2 3]  
 
-   playTime $part1 $part2;
-   
+   playTime $part1 $part2;   
    playSilence 100;
    playMsg "utc";
    playSilence 200;
@@ -447,9 +429,7 @@ proc utime {utime} {
 proc ceiling {param} {
    playMsg "ca";
    playSilence 100;
-   playNumberUnit $param "unit_feet";
-   playSilence 100;
-   playUnit "unit_feet" $param
+   playNumberWithUnit $param "unit_feet";
    playSilence 200;
 }
 
@@ -457,8 +437,7 @@ proc ceiling {param} {
 # QNH
 proc qnh {value} {
   playMsg "qnh"; 
-  playNumberUnit $value "unit_hPa";
-  playUnit "unit_hPa" $value;
+  playNumberWithUnit $value "unit_hPa";
   playSilence 200;
 }
 
@@ -467,8 +446,7 @@ proc qnh {value} {
 proc altimeter {value} {
   playMsg "altimeter";
   playSilence 100;
-  playNumberUnit $value "unit_inch";
-  playUnit "unit_inch" $value;
+  playNumberWithUnit $value "unit_inch";
   playSilence 200;
 }
 
@@ -491,9 +469,7 @@ proc clouds {obs height {cbs ""}} {
     playMsg $cbs;
   }
   playMsg "altimeter"
-  playNumberUnit $height "unit_feet";
-  playUnit "unit_feet" $height;
- 
+  playNumberWithUnit $height "unit_feet";
   playSilence 200;
 }
 
@@ -522,33 +498,29 @@ proc max_daytemp {deg time} {
   playSilence 50;
   playMsg "daytime_temperature";
   playSilence 150;
-  playNumberUnit $deg "unit_degree";
-  playUnit "unit_degree" $deg;
+  playNumberWithUnit $deg "unit_degree";
   playSilence 150;
   playMsg "at";
   playSilence 50;
-  playNumberUnit $time "hour";
-  playUnit "hour" $time
+  playNumberWithUnit $time "hour";
   playSilence 200;
 }
 
 
 # min day temperature
-
 proc min_daytemp {deg time} {
   playMsg "predicted";
   playSilence 50;
-  playMsg "minimal";
+  playMsg "minimalf";
   playSilence 50;
   playMsg "daytime_temperature";
   playSilence 150;
-  playNumberUnit $deg "unit_degree";
-  playUnit "unit_degree" $deg;
+  playNumberWithUnit $deg "unit_degree";
   
   playSilence 150;
   playMsg "at";
   playSilence 50;
-  playNumberUnit $time "hour";
+  playNumberWithUnit $time "hour";
   playSilence 200;
 }
 
@@ -559,10 +531,8 @@ proc rmk_maxtemp {val} {
   playMsg "temperature";
   playMsg "in_the";
   playMsg "last1";
-  playNumberUnit 6 "hour";
-  playUnit "hour" 6;
-  playNumberUnit $val "unit_degree";
-  playUnit "unit_degree" $val;
+  playNumberWithUnit 6 "hour";
+  playNumberWithUnit $val "unit_degree";
   playSilence 200;
 }
 
@@ -573,10 +543,8 @@ proc rmk_mintemp {val} {
   playMsg "temperature";
   playMsg "at"
   playMsg "last1";
-  playNumberUnit 6 "hour";
-  playUnit "hour" 6;
-  playNumberUnit $val "unit_degree";
-  playUnit "unit_degree" $val;
+  playNumberWithUnit 6 "hour";
+  playNumberWithUnit $val "unit_degree";
   playSilence 200;
 }
 
@@ -594,11 +562,9 @@ proc rmk_pressure {val args} {
   playMsg "tendency";
   playMsg "at"
   playMsg "next1";
-  playNumberUnit 3 "hour";
-  playUnit "hour" 3;
+  playNumberWithUnit 3 "hour";
   playMsg "pressure";
-  playNumberUnit $val "unit_mb";
-  playUnit "unit_mb" $val;
+  playNumberWithUnit $val "unit_mb";
 
   foreach item $args {
      if [regexp {(\d+)} $item] {
@@ -620,10 +586,8 @@ proc rmk_precipitation {hour val} {
     playMsg "last1";
   }
   
-  playNumberUnit $hour "hour";
-  playUnit "hour" $hour;
-  playNumberUnit $val "unit_inch";
-  playUnit "unit_inch" $val;
+  playNumberWithUnit $hour "hour";
+  playNumberWithUnit $val "unit_inch";
   playSilence 200;
 }
 
@@ -644,28 +608,23 @@ proc rmk_precip {args} {
 
 # daytime minimal/maximal temperature
 proc rmk_minmaxtemp {max min} {
-  playMsg "maximum";
-  playMsg "daytime";
+  playMsg "minimalf";
   playMsg "temperature";
+  playMsg "daytime";
   playNumberUnit $min "unit_degree";
-  playMsg "unit_degree" $min;
-  playNumberUnit $max "unit_degree";
-  playMsg "unit_degree" $max;
+  playMsg "maximalf";
+  playNumberWithUnit $max "unit_degree";
   playSilence 200;
 }
 
 
 # recent temperature and dewpoint in RMK section
 proc rmk_tempdew {temp dewpt} {
-  
   playMsg "re";
-  
   playMsg "temperature";
-  playNumberUnit $temp "unit_degree";
-  playUnit "unit_degree" $temp  ;
+  playNumberWithUnit $temp "unit_degree";
   playMsg "dewpoint";
-  playNumberUnit $dewpt "unit_degree";
-  playUnit "unit_degree" $dewpt;
+  playNumberWithUnit $dewpt "unit_degree";
   playSilence 200;
 }
 
@@ -676,18 +635,14 @@ proc windshift {val} {
   playSilence 100;
   Module::playCoreMsg "in";
   playSilence 100;
-  
-  playNumberUnit $val "hour";
-  playUnit "hour" $val
-  
+  playNumberWithUnit $val "hour";
   playSilence 200;
 }
 
 # QFE value
 proc qfe {val} {
   playMsg "qfe";
-  playNumberUnit $val "unit_hPa";
-  playUnit "unit_hPa" $val;
+  playNumberWithUnit $val "unit_hPa";
   playSilence 200;
 }
 
@@ -723,8 +678,7 @@ proc runwaystate args {
                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent_range" : "${unit}_range"}]
                 
                 playMsg $current
-                playNumberUnit $num $unit_suffix
-                playUnit $unit_suffix $num
+                playNumberWithUnit $num $unit_suffix
                 incr i 3
                 continue
             }
@@ -740,8 +694,7 @@ proc runwaystate args {
                 set unit_suffix [expr {$next3 eq "percent" ? "unit_percent_range" : "${next3}_range"}]
                 playNumberUnit $current $unit_suffix
                 playMsg "to"
-                playNumberUnit $next2 $unit_suffix
-                playUnit $unit_suffix $next2
+                playNumberWithUnit $next2 $unit_suffix
                 incr i 4
                 continue
             }
@@ -752,8 +705,7 @@ proc runwaystate args {
             set unit [lindex $args $i+1]
             if {$unit eq "percent" || [string match "unit_*" $unit]} {
                 set unit_suffix [expr {$unit eq "percent" ? "unit_percent" : $unit}]
-                playNumberUnit $current $unit_suffix
-                playUnit $unit_suffix $current
+                playNumberWithUnit $current $unit_suffix
                 incr i 2
                 continue
             }
@@ -772,28 +724,7 @@ proc runwaystate args {
 
 # output numbers
 proc sayNumber { number } {
-  variable ts;
-  variable hd;
-
-  if {$number > 99 && $number < 10000} {
-    if [ expr {$number % 100} ] {
-      spellNumber $number;
-    } else {
-      set ts [expr {int($number / 1000)}];   # 1...9 thousand
-      set hd [expr {(($number - $ts * 1000)/100) * 100}];  # 1...9 houndred
-
-      # say 1...9 thousand
-      if { $ts > 0 } {
-        playMsg $ts;
-        playMsg "thousand";
-      }
-      if { $hd > 0 } {
-        playMsg $hd;
-      }
-    }
-  } else {
-    spellNumber $number;
-  }
+  playNumberUnit $number "male"
 }
 
 
@@ -803,14 +734,10 @@ proc say args {
 
   playSilence 100;
   foreach item $args {
-    if [regexp {^(\d+)} $item] {
-      sayNumber $item;
+    if [regexp {^(-?\d+\.?\d*)} $item] {
+      playNumberUnit $item "male";
     } else {
-      if {$item == "."} {
-        playMsg "decimal";
-      } else {
-        playMsg $item;
-      }
+      playMsg $item;
     }
     playSilence 100;
   }
@@ -879,8 +806,7 @@ variable a 0;
     playMsg "covering";
     incr a;
     set qty [lindex $args $a] 
-    playNumberUnit $qty "unit_eighth";
-    playUnit "unit_eighth" $qty;
+    playNumberWithUnit $qty "unit_eighth";
     incr a;
     playSilence 100;
   }

@@ -118,7 +118,7 @@ proc unknown_command {cmd} {
 # Executed when command to count nodes on the channel is called
 #
 proc count_clients {count_clients} {
-  playNumberWithUnits $count_clients "frn_connected_client"
+  playNumberWithUnit $count_clients "frn_connected_client"
   playSilence 250;
 }
 

@@ -63,8 +63,8 @@ set dataTests {
 	{"qso_recorder_already_active" "Q S O рекордер уже активен"}
 	{"qso_recorder_timeout_activate" "Q S O рекордер подключен по тайм-ауту"}
 	{"qso_recorder_timeout_deactivate" "Q S O рекордер отключен по тайм-ауту"}
-	{"set_language" "ru_Ru" "${active_module}: Setting language ru_Ru (NOT IMPLEMENTED)"}
-	{"list_languages" "${active_module}: Available languages: (NOT IMPLEMENTED)"}	
+	{"set_language" "ru_Ru" "SimplexLogic: Setting language ru_Ru (NOT IMPLEMENTED)"}
+	{"list_languages" "SimplexLogic: Available languages: (NOT IMPLEMENTED)"}	
 	{"config_updated" "test" "2" "Переменная конфигурации test изменила значение на 2"}
 	{"remote_cmd_received" "${active_module}" "123" "Модулем ${active_module} получена команда 123"}
 	{"remote_received_tg_updated" "${active_module}" "112" "От логического ядра ${active_module} принята разговорная группа 112"}

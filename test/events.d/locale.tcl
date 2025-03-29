@@ -107,142 +107,16 @@ proc playThreeDigitNumber {number} {
 }
 
 
-#
-# Say a number as intelligently as possible.
-#
-# Any leading or trailing whitespace is ignored.
-# If a number is zero, the sign will be ignored.
-# For numbers beginning with a point, a zero is prepended.
-# Numbers >= 1000 will be split into three and two digit groups.
-# Any leading zeros will be preserved.
-#
-# Examples:
-#
-#	1	- one
-#	24	- twentyfour
-#	245	- twohundred and fourtyfive
-#	1234	- twelve thirtyfour
-#	12345	- onehundred and twentythree fourtyfive
-#	136.5	- onehundred and thirtysix point five
-#	007.123	- zero zero seven point one two three
-#	.123	- zero point one two three
-#	-1	- minus one
-#	-0.0	- zero point zero
-#	+1.5	- plus one point five
-#
-proc playNumber {number} {
-  if {![regexp {^\s*([+-])?(\d*)(?:\.(\d+))?\s*$} $number \
-        -> sign integer fraction]} {
-    puts "*** ERROR\[playNumber\]: Неверное число '$number'"
-    return
-  }
-
-  if {[string length "$integer"] == 0} {
-    set integer "0"
-  }
-
-  if [expr double("$integer.$fraction") != 0.0] {
-    if {$sign == "+"} {
-      playMsg "Default" "plus"
-    } elseif  {$sign == "-"} {
-      playMsg "Default" "minus"
-    }
-  }
-
-  if {$fraction != ""} {
-    playNumber $integer;
-    playMsg "Default" "decimal";
-    spellNumber $fraction;
-    return;
-  }
-
-  while {[string length $integer] > 0} {
-    set len [string length $integer];
-    if {$len == 1} {
-      playMsg "Default" $integer;
-      set integer "";
-    } elseif {$len % 2 == 0} {
-      playTwoDigitNumber [string range $integer 0 1];
-      set integer [string range $integer 2 end];
-    } else {
-      playThreeDigitNumber [string range $integer 0 2];
-      set integer [string range $integer 3 end];
-    }
-  }
-}
-
-
-#
-# Say the time specified by function arguments "hour" and "minute".
-#
-proc playTime_original {hour minute} {
-  variable Logic::CFG_TIME_FORMAT
-
-  # Strip white space and leading zeros. Check ranges.
-  if {[scan $hour "%d" hour] != 1 || $hour < 0 || $hour > 23} {
-    error "playTime: Не цифровой час или значение вне диапазона: $hour"
-  }
-  if {[scan $minute "%d" minute] != 1 || $minute < 0 || $minute > 59} {
-    error "playTime: Не цифровая минута или значение вне диапазона: $hour"
-  }
-
-  if {[info exists CFG_TIME_FORMAT] && ($CFG_TIME_FORMAT == 24)} {
-    if {$hour == 0} {
-      set hour "00"
-    } elseif {[string length $hour] == 1} {
-      set hour "o$hour";
-    }
-    playTwoDigitNumber $hour;
-
-    if {$minute != 0} {
-      if {[string length $minute] == 1} {
-        set minute "o$minute";
-      }
-      playTwoDigitNumber $minute;
-    }
-    playMsg "Default" "hours";
-    playSilence 100;
-  } else {
-    # Anything not 24 will fail back to 12 hour default
-    if {$hour < 12} {
-      set ampm "AM";
-      if {$hour == 0} {
-        set hour 12;
-      }
-    } else {
-      set ampm "PM";
-      if {$hour > 12} {
-        set hour [expr $hour - 12];
-      }
-    }
-  
-    playMsg "Default" [expr $hour];
-    if {$minute != 0} {
-      if {[string length $minute] == 1} {
-        set minute "o$minute";
-      }
-      playTwoDigitNumber $minute;
-    }
-    playSilence 100;
-    playMsg "Core" $ampm;
-  }
-}
-
-
-#
-# Say the given frequency as intelligently as popssible
-#
-#   fq -- The frequency in Hz
-#
-
-
 
 ###############################################################################
 #
 # Русифицированные процедуры
 #
-#
 ###############################################################################
+proc playNumber { number } {
+	playNumberUnit $number "male"
+}
+
 proc playFrequency {fq} {
   if {$fq < 1000} {
     set unit "Hz"
@@ -258,8 +132,8 @@ proc playFrequency {fq} {
   }
 
   set fq_value [string trimright [format "%.3f" $fq] ".0"]
-  playNumberUnit $fq_value $unit
-  playInit $unit $fq_value
+  playNumberWithUnit $fq_value $unit
+#   playInit $unit $fq_value
 }
 
 
@@ -320,6 +194,22 @@ proc playTime {hour minute } {
 proc playNumberUnit { value {unit ""} } {
 	# числа произносим в модуле "Default"
 	set modulename "Default"
+	
+	# для пар число + единица удаляем лидирующие нули для предотвращения интерпретации числа как восьмеричного
+	set dangerous_units { hour minute }
+	if { [string match "unit_*" $unit] || [string match "*_range" $unit] || $unit in $dangerous_units} {
+		regsub {^0+(\d+)} $value {\1} value
+		# puts "***DEBUG value=$value"
+	}
+	
+	# валидные единицы
+	if { ![string is double -strict $value] } {
+		puts "\nERROR*** playNumberUnit получил недопустимое число ($value)"
+		exit 1
+	}
+	
+
+
 
 	# знак
 	if {$value < 0} {
@@ -327,6 +217,9 @@ proc playNumberUnit { value {unit ""} } {
 		# Убираем знак для дальнейшей обработки
 		set value [expr {abs($value)}]
 	}
+
+	
+
 
 	# нулевая целая часть 
 	set isZeroIntegerPart [expr {$value < 1}]
@@ -420,9 +313,7 @@ proc playNumberUnit { value {unit ""} } {
 	}
 }
 
-
-
-# Процедура для воспроизведения числа с единицей измерения
+# Процедура для воспроизведения числа (беэ единицы измерения)
 # locale.tcl
 # Воспроизведение количества value в диапазоне (0-999)
 # единица измерения unit служит только для определения рода/склонения и не произносится
@@ -499,9 +390,12 @@ proc playNumbers {value {unit ""} } {
 # количественная quantity часть служит для определения единственной или
 # множественной формы именной части и не произносится
 proc playUnit { unit quantity } {
-
+	# puts "***DEBUG playUnit: unit=$unit quantity=$quantity"
 	set modulename [getModuleName $unit]
-	
+	# удалить лидирующие нули из количества
+	regsub {^0+(\d+)} $quantity {\1} quantity
+	# puts "***DEBUG playUnit: unit=$unit quantity=$quantity"
+
 	# специальная логика для винительного падежа
 	if { [string match "*_range" $unit] } {		
 
@@ -531,7 +425,7 @@ proc playUnit { unit quantity } {
 	
 	# получаем базовое числительное
 	set numeral [getNumeral $quantity]
-	
+	# puts "***DEBUG playUnit: numeral=$numeral quantity=$quantity"
 	# если в unit есть "_range", получаем суффикс, посе чего удаляем "_range" из $unit и произносим полученную единицу
 	if {[string match "*_range" $unit]} {
 		set suffix [getUnitSuffix $unit $numeral]
@@ -543,13 +437,11 @@ proc playUnit { unit quantity } {
 	playMsg $modulename "${unit}${suffix}"
 }
 
-
 # Возвращает род единицы измерения 
 # если вместо единицы измерения получен род или диапазон - возвращается без изменений
 proc getGender {unit} {
-	
 	# определяем список единиц женского рода и список простых родов
-	set femaleUnits { female unit_mile unit_mph thousand integer tenth hundredth minute }
+	set femaleUnits { el_connected_station female unit_mile unit_mph thousand integer tenth hundredth minute }
 	set genders {male female neuter}
 	
 	# для винительного падежа или рода возвращаем без изменения
@@ -585,7 +477,7 @@ proc getModuleName {unit} {
 proc getUnitSuffix {unit quantity} {
 
 	# эти всегда склоняются в единственном или множественном числе
-	set numeralUnits { integer integer_range tenth tenth_range hundredth hundredth_range minute_range hour_range} 
+	set numeralUnits { integer integer_range tenth tenth_range hundredth hundredth_range minute_range hour_range } 
 	set quantity [getNumeral $quantity]
 		
 	# всегда склоняются в единственном или множественном числе
@@ -645,7 +537,10 @@ proc getNumeral {value} {
 
 		if {$remainder == 0} {
 			# Если остаток равен нулю, возвращаем только количество тысяч
-			set value $thousands
+			# set value $thousands
+
+			# круглые тысячи возвращаем полностью (для склонений целых тысяч)
+			return $value
 		} else {
 			# Если остаток не равен нулю, возвращаем только остаток
 			set value $remainder
@@ -707,6 +602,14 @@ proc getNumberSuffix {quantity unit} {
 
 }
 
+# воспроизведение пары число - единица измерения
+proc playNumberWithUnit {number unit} {
+	playNumberUnit $number $unit
+	playUnit $unit $number
+}
+
+
+# TODO: проверить как работает playSubcommands и при необходимости исправить ее также (в части произнесения доступных подкоманд)
 
 #
 # This file has not been truncated

@@ -122,7 +122,7 @@ proc spellEchoLinkCallsign {call} {
 #
 proc list_connected_stations {connected_stations} {
   set quantity [llength $connected_stations];
-  playNumberWithUnits $quantity "el_connected_station"
+  playNumberWithUnit $quantity "el_connected_station"
   
   foreach {call} "$connected_stations" {
     spellEchoLinkCallsign $call;
@@ -161,7 +161,7 @@ proc status_report {} {
   global active_module;
   
   if {$active_module == $module_name} {
-    playNumberWithUnits $num_connected_stations "el_connected_station";
+    playNumberWithUnit $num_connected_stations "el_connected_station";
   }
 }
 
