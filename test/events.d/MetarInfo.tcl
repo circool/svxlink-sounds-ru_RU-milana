@@ -557,7 +557,7 @@ proc min_daytemp {deg time} {
 proc rmk_maxtemp {val} {
   playMsg "maximalf";
   playMsg "temperature";
-  playMsg "for";
+  playMsg "in_the";
   playMsg "last1";
   playNumberUnit 6 "hour";
   playUnit "hour" 6;
