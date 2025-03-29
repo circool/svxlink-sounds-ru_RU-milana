@@ -1,4 +1,4 @@
-#TODO.md
+# TODO.md
 
 - [X] Модуль Default
     - [X] Создать клипы для имеющихся в системе аналогов
@@ -25,12 +25,12 @@
     - [X] Изменить порядок информирования о количестве подключенных станций
     - [Х] Изменить произношение на connected_station1 на "подлюченные станции"
     - [X] Неверный вызов playUnit - нужно добавить контекст "EchoLink"
-    - [ ] WARNING: Could not find audio clip "repeater" in context "EchoLink"
+    - [X] WARNING: Could not find audio clip "repeater" in context "EchoLink"
 
 - [X] Модуль Frn
     - [X] Создать клипы для имеющихся в системе аналогов
     - [X] Исправить произношение количества подключенных клиентов
-    - [ ] Ошибка при вызове справки -> *** ERROR: Unable to handle event: Frn:: in logic SimplexLogic (invalid command name "Frn::")
+    - [X] Ошибка при вызове справки -> *** ERROR: Unable to handle event: Frn:: in logic SimplexLogic (invalid command name "Frn::")
 
 - [X] Модуль Help
     - [X] Создать клипы для имеющихся в системе аналогов
@@ -78,6 +78,11 @@
         - [ ] фонетические буквы
         - [ ] часы, минуты, частоты
         - [ ] фразы
+
+- [X] Написать тесты для проверки результатов
+    - [X] Создать assertы для модулей и логики    
+    - [X] Создать моки для замены процедур playMsg, playSilence, playSubcommands, playTone    
+
 - [X] Провести тестирование логики формирования  
     - [X] Числа  
     - [X] Числа женского рода 
@@ -87,3 +92,15 @@
     - [X] Числа в винительном падеже 
     - [X] Числа в винительном падеже в сочетании с единицей измерения 
     - [X] Время в форматах 12/24
+    - [ ]  Логика
+        - [ ]  Simplex
+        - [ ]  Repeater
+        - [ ]  Reflector
+    - [ ]  Модули
+        - [X]  Help
+        - [X]  Parrot
+        - [X]  EchoLink
+        - [X]  MetarInfo
+        - [X]  Frn
+
+    - [ ] Внести исправления по результатам тестирования
