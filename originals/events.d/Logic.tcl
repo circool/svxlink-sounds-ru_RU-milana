@@ -64,8 +64,8 @@ variable sql_rx_id "?";
 # Executed when the SvxLink software is started
 #
 proc startup {} {
-  playMsg "Core" "online"
-  send_short_ident
+  #playMsg "Core" "online"
+  #send_short_ident
 }
 
 
@@ -127,13 +127,8 @@ proc manual_identification {} {
       }
     }
   }
-  
- foreach module [split $loaded_modules " "] {
-  if { $module ==  "Help"} {
-    playMsg "Default" "press_0_for_help"
-    playSilence 250;
-  }
- }
+  playMsg "Default" "press_0_for_help"
+  playSilence 250;
 }
 
 

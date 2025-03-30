@@ -2,26 +2,21 @@
 global argv debugMode module_name module_list CFG_TYPE logic_name mycall report_ctcss langdir debug_active_module showPauses
 # описание массивов для тестирования
 source "./assert_data_table/data_files_specs.tcl"
+source "dict.tcl"
 
 # режим тестирования
 set ::debugMode 1
 set ::showPauses 0
-set ::debug_active_module 1
+set ::debug_active_module 0
 
 
-variable active_module "EchoLink"
+variable active_module "MetarInfo"
 
 # различные переменные
 set mycall "R2ADU"
 set report_ctcss "88.5"
 variable loaded_modules "ModuleEchoLink ModuleFrn ModuleMetarInfo ModuleHelp ModuleParrot"
-set module_list {
-  0 "Help"
-  1 "Parrot"
-  2 "EchoLink"
-  5 "MetarInfo"
-  7 "Frn"
-}
+#
 
 set langdir "../ru_RU"
 variable list_languages {ru_RU en_EN}
@@ -46,10 +41,17 @@ set testFailed 0
 if {$debugMode} {
     puts "\n\033\[32mОбработка проблемных сочетаний\033\[0m"
     
+    puts "\n\033\[33m --- Симплекс --- \033\[0m"
+    set Logic::CFG_TYPE "Simplex"
     foreach file $debugFiles {       
         runTestsFromFile $file
     }
 
+    puts "\n\033\[33m --- Дуплекс --- \033\[0m"
+    set Logic::CFG_TYPE "Repeater"
+    foreach file $debugFiles {       
+        runTestsFromFile $file
+    }
     if { $debug_active_module } {
         switch $active_module {
             "MetarInfo" {
@@ -70,6 +72,7 @@ if {$debugMode} {
                 set moduleFileList $moduleHelpFiles
             }
         }   
+        
         foreach file $moduleFileList {
             runTestsFromFile $file $active_module
         }
@@ -85,6 +88,7 @@ if {$debugMode} {
 
     # Обработка модулей
     puts "\n\033\[33mОбработка модулей\033\[0m"
+    set stored_module $active_module
     foreach module $loaded_modules {
         
         set active_module [string map {"Module" ""} $module]
@@ -120,8 +124,8 @@ if {$debugMode} {
         
     }
     
-    # Эмулируем работу модуля Эхолинк
-    set active_module "EchoLink"
+    # Возвращаем значение в переменной active_module 
+    set active_module $stored_module
     
     # Обработка логики
     puts "\n\033\[33mОбработка логики\033\[0m"
