@@ -102,7 +102,7 @@ proc spellEchoLinkCallsign {call} {
     playSilence 50
     playMsg "repeater"
   } elseif [regexp {^\*(.+)\*$} $call ignored name] {
-    playMsg "conference"
+    Module::playCoreMsg "conference1"
     playSilence 50
     set lc_name [string tolower $name]
     if [file exists "$langdir/EchoLink/conf-$lc_name.wav"] {
@@ -158,8 +158,9 @@ proc no_more_connections_allowed {} {
 proc status_report {} {
   variable num_connected_stations;
   variable module_name;
+
+  playSilence 200;
   global active_module;
-  
   if {$active_module == $module_name} {
     playNumberWithUnit $num_connected_stations "el_connected_station";
   }
@@ -323,6 +324,9 @@ proc cbc_no_match {code} {
 # Executed when the connect by callsign list has been retrieved
 #
 proc cbc_list {call_list} {
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "aborted";
+  playSilence 200
   playMsg "choose_station";
   set idx 0;
   foreach {call} $call_list {
@@ -380,7 +384,8 @@ proc cbc_timeout {} {
 # Executed when the disconnect by callsign list has been retrieved
 #
 proc dbc_list {call_list} {
-  playMsg "disconnect_by_callsign";
+  Module::playCoreMsg "connection";
+  Module::playCoreMsg "aborted";
   playSilence 200
   playMsg "choose_station";
   set idx 0;
@@ -398,8 +403,8 @@ proc dbc_list {call_list} {
 # Executed when the disconnect by callsign function is manually aborted
 #
 proc dbc_aborted {} {
-  playMsg "disconnect_by_callsign";
-  
+  # playMsg "disconnect_by_callsign";
+  Module::playCoreMsg "connection";
   Module::playCoreMsg "aborted";
 }
 

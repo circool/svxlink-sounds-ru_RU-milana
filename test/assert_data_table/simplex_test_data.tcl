@@ -39,7 +39,7 @@
 # необходимо установить $logic_name <== RepeaterLogic
 set dataTests {
 	{"startup" "на частоте работает симплексный узел Роман двойка Анна Дмитрий Ульяна дробь Леонид"}
-	{"manual_identification" "на частоте работает симплексный узел Роман двойка Анна Дмитрий Ульяна дробь Леонид Текущее время тринадцать часов сорок семь минут Частота субтона восемьдесят пять целых и пять десятых Герц активный модуль ${active_module} ноль подключенных станций"}
+	{"manual_identification" "на частоте работает симплексный узел Роман двойка Анна Дмитрий Ульяна дробь Леонид Текущее время тринадцать часов сорок семь минут Частота субтона восемьдесят пять целых и пять десятых Герца активный модуль ${active_module} ноль подключенных станций"}
 	{"logic_online" "1" "на частоте работает симплексный узел Роман двойка Анна Дмитрий Ульяна дробь Леонид"}
 	{"logic_online" "0" ""}
 	{"send_short_ident" "-1" "-1" "симплексный узел Роман двойка Анна Дмитрий Ульяна дробь Леонид"}
@@ -58,7 +58,7 @@ set dataTests {
 	{"deactivating_link" "RUSSIA" "разрывается соединение с Роман Ульяна Семен Семен Иван Анна"}
 	{"link_not_active" "RUSSIA" "линк Роман Ульяна Семен Семен Иван Анна не активен"}
 	{"link_already_active" "name" "линк Николай Анна Михаил Елена уже активен"}
-	{"dtmf_digit_received" "3" "100" "получена DTMF посылка 3 продолжительностью в 100 миллисекунд"}
+	{"dtmf_digit_received" "3" "100" ""}
 	{"qso_recorder_not_active" "Q S O рекордер не активен"}
 	{"qso_recorder_already_active" "Q S O рекордер уже активен"}
 	{"qso_recorder_timeout_activate" "Q S O рекордер подключен по тайм-ауту"}
@@ -66,6 +66,6 @@ set dataTests {
 	{"set_language" "ru_Ru" "SimplexLogic: Setting language ru_Ru (NOT IMPLEMENTED)"}
 	{"list_languages" "SimplexLogic: Available languages: (NOT IMPLEMENTED)"}	
 	{"config_updated" "test" "2" "Переменная конфигурации test изменила значение на 2"}
-	{"remote_cmd_received" "${active_module}" "123" "Модулем ${active_module} получена команда 123"}
-	{"remote_received_tg_updated" "${active_module}" "112" "От логического ядра ${active_module} принята разговорная группа 112"}
+	{"remote_cmd_received" "${active_module}" "123" ""}
+	{"remote_received_tg_updated" "${active_module}" "112" ""}
 }

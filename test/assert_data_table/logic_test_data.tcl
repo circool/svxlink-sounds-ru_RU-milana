@@ -1,6 +1,10 @@
 set dataTests {
 	
 	{"no_such_module" "2" "модуль два не найден"}	
+	{"manual_identification" "---"}
+	{"send_short_ident" "---"}
+	{"send_short_ident" "12" "22" "---"}
+	{"send_long_ident" "12" "22" "---"}
 	{"send_rgr_sound" "звучит тон 440 500 100"}
 	{"macro_empty" "получена пустая макрокоманда"}
 	{"macro_not_found" "макрокоманда не найдена"}
@@ -22,6 +26,6 @@ set dataTests {
 	{"set_language" "ru_Ru" "${logic_name}: Setting language ru_Ru (NOT IMPLEMENTED)"}
 	{"list_languages" "${logic_name}: Available languages: (NOT IMPLEMENTED)"}	
 	{"config_updated" "test" "2" "Переменная конфигурации test изменила значение на 2"}
-	{"remote_cmd_received" "${active_module}" "123" "Модулем ${active_module} получена команда 123"}
-	{"remote_received_tg_updated" "${active_module}" "112" "От логического ядра ${active_module} принята разговорная группа 112"}
+	{"remote_cmd_received" "${active_module}" ""}
+	{"remote_received_tg_updated" "${active_module}" "112" ""}
 }

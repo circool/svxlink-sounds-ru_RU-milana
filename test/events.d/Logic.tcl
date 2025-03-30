@@ -38,8 +38,6 @@ variable long_cw_id_enable      0
 variable long_announce_enable   0
 variable long_announce_file     ""
 
-variable admin_help_enable      0
-
 #
 # The ident_only_after_tx variable indicates if identification is only to
 # occur after the node has transmitted. The variable is setup below from the
@@ -66,9 +64,12 @@ variable sql_rx_id "?";
 # Executed when the SvxLink software is started
 #
 proc startup {} {
+  playMsg "Core" "online"
+  
+  # Вместо краткой идентификации воспроизводим фразу
+  # На частоте работет [репитер или симплексный узел] + позывной
   variable CFG_TYPE;
   global mycall;
-  playMsg "Core" "online"
   if {$CFG_TYPE == "Repeater"} {
     playMsg "Core" "repeater";
   } elseif {$CFG_TYPE == "Simplex"} {
@@ -76,8 +77,8 @@ proc startup {} {
   } elseif {$CFG_TYPE == "Reflector"} {
     playMsg "Core" "reflector";
   }
-
   spellWord $mycall;
+  playSilence 300;
 }
 
 
@@ -109,8 +110,7 @@ proc manual_identification {} {
   regexp {([1-5]?\d)$} [clock format $epoch -format "%M"] -> minute;
   set prev_ident $epoch;
 
-  playMsg "Core" "online";
-  
+  playMsg "Core" "online"; 
   if {$CFG_TYPE == "Repeater"} {
     playMsg "Core" "repeater";
   } elseif {$CFG_TYPE == "Simplex"} {
@@ -118,9 +118,7 @@ proc manual_identification {} {
   } elseif {$CFG_TYPE == "Reflector"} {
     playMsg "Core" "reflector";
   }
-
   spellWord $mycall;
-  
   playSilence 250;
   playMsg "Core" "the_time_is";
   playTime $hour $minute;
@@ -133,7 +131,6 @@ proc manual_identification {} {
   if {$active_module != ""} {
     playMsg "Core" "active";
     playMsg "Core" "module";
-    
     playMsg $active_module "name";
     playSilence 250;
     set func "::";
@@ -146,17 +143,18 @@ proc manual_identification {} {
       set func "::";
       append func $module "::status_report";
       if {"[info procs $func]" ne ""} {
-	$func;
+	      $func;
       }
     }
   }
   
- foreach module [split $loaded_modules " "] {
-  if { $module ==  "Help"} {
-    playMsg "Default" "press_0_for_help"
-    playSilence 250;
+  # Про справку говорить только если модуль Help включен
+  foreach module [split $loaded_modules " "] {
+    if { $module ==  "Help"} {
+      playMsg "Default" "press_0_for_help"
+      playSilence 250;
+    }
   }
- }
 }
 
 
@@ -175,7 +173,7 @@ proc send_short_ident {{hour -1} {minute -1}} {
 
   # Play voice id if enabled
   if {$short_voice_id_enable} {
-    # puts "Playing short voice ID"
+    puts "Произносится краткая идентификация"
     
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
@@ -188,7 +186,7 @@ proc send_short_ident {{hour -1} {minute -1}} {
 
   # Play announcement file if enabled
   if {$short_announce_enable} {
-    puts "Playing short announce"
+    puts "Произносится краткий анонс"
     if [file exist "$short_announce_file"] {
       playFile "$short_announce_file"
       playSilence 500
@@ -197,7 +195,7 @@ proc send_short_ident {{hour -1} {minute -1}} {
 
   # Play CW id if enabled
   if {$short_cw_id_enable} {
-    puts "Playing short CW ID"
+    puts "Передается CW ID"
     if {$CFG_TYPE == "Repeater"} {
       set call "$mycall/R"
       CW::play $call
@@ -226,7 +224,7 @@ proc send_long_ident {hour minute} {
 
   # Play the voice ID if enabled
   if {$long_voice_id_enable} {
-    # puts "Playing Long voice ID"
+    puts "Произносится длинная голосовая идентификация"
     
     if {$CFG_TYPE == "Repeater"} {
       playMsg "Core" "repeater";
@@ -256,7 +254,7 @@ proc send_long_ident {hour minute} {
 
   # Play announcement file if enabled
   if {$long_announce_enable} {
-    puts "Playing long announce"
+    puts "Произносится долгий анонс"
     if [file exist "$long_announce_file"] {
       playFile "$long_announce_file"
       playSilence 500
@@ -265,7 +263,7 @@ proc send_long_ident {hour minute} {
 
   # Play CW id if enabled
   if {$long_cw_id_enable} {
-    puts "Playing long CW ID"
+    puts "Передается CW ID"
     if {$CFG_TYPE == "Repeater"} {
       set call "$mycall/R"
       CW::play $call
@@ -312,6 +310,7 @@ proc macro_not_found {} {
   playMsg "Core" "macro";
   playMsg "Core" "not";
   playMsg "Core" "foundf";
+  playSilence 200
 
 }
 
@@ -322,6 +321,7 @@ proc macro_not_found {} {
 proc macro_syntax_error {} {
   playMsg "Core" "macro";
   playMsg "Core" "has_error";
+  playSilence 200
 
 }
 
@@ -337,6 +337,7 @@ proc macro_module_not_found {} {
   playMsg "Core" "module";
   playMsg "Core" "not";
   playMsg "Core" "found";
+  playSilence 200
 }
 
 
@@ -344,12 +345,12 @@ proc macro_module_not_found {} {
 # Executed when the activation of the module specified in the macro command
 # failed.
 #
-proc macro_module_activation_failed {} {
-  
+proc macro_module_activation_failed {} {  
   playMsg "Core" "not";
   playMsg "Core" "success";
   playMsg "Core" "turn_on";
   playMsg "Core" "module";
+  playSilence 200
 }
 
 
@@ -366,6 +367,7 @@ proc macro_another_active_module {} {
   playMsg "Core" "active1";
   playMsg "Core" "module";
   playMsg $active_module "name";
+  playSilence 200
 }
 
 
@@ -378,6 +380,7 @@ proc unknown_command {cmd} {
   playMsg "Core" "unknownf";
   playMsg "Core" "command";
   spellWord $cmd;
+  playSilence 200
 }
 
 
@@ -391,7 +394,7 @@ proc command_failed {cmd} {
   playMsg "Core" "execute";
   playMsg "Core" "command1";
   spellWord $cmd;
-  
+  playSilence 200
 }
 
 
@@ -405,6 +408,7 @@ proc activating_link {name} {
     playMsg "Core" "connection";
     playMsg "Core" "with";
     spellWord $name;
+    playSilence 200
   }
 }
 
@@ -418,6 +422,7 @@ proc deactivating_link {name} {
     playMsg "Core" "disconnecting";
     playMsg "Core" "with";
     spellWord $name;
+    playSilence 300
   }
 }
 
@@ -433,6 +438,7 @@ proc link_not_active {name} {
     spellWord $name;
     playMsg "Core" "not";
     playMsg "Core" "active1";
+    playSilence 200
   }
 }
 
@@ -448,7 +454,7 @@ proc link_already_active {name} {
     spellWord $name;
     playMsg "Core" "already";
     playMsg "Core" "active1";
-    
+    playSilence 200
   }
 }
 
@@ -488,7 +494,7 @@ proc squelch_open {rx_id is_open} {
 # return 0 to make SvxLink continue processing as normal.
 #
 proc dtmf_digit_received {digit duration} {
-  puts -nonewline "получена DTMF посылка $digit продолжительностью в $duration миллисекунд";
+  # puts -nonewline "получена DTMF посылка $digit продолжительностью в $duration миллисекунд";
   return 0;
 }
 
@@ -756,7 +762,7 @@ proc logic_online {online} {
 # core
 #
 proc config_updated {tag value} {
-  puts "Переменная конфигурации $tag изменила значение на $value"
+  # puts "Переменная конфигурации $tag изменила значение на $value"
 }
 
 
@@ -767,7 +773,7 @@ proc config_updated {tag value} {
 #   cmd   -- The received command
 #
 proc remote_cmd_received {logic cmd} {
-  puts "От логического ядра $logic принята конманда $cmd"
+  # puts "Логическим ядром $logic принята команда $cmd"
   #playDtmf "$cmd" "500" "50"
 }
 
@@ -779,7 +785,7 @@ proc remote_cmd_received {logic cmd} {
 #   tg    -- The received talkgroup
 #
 proc remote_received_tg_updated {logic tg} {
-  puts "От логического ядра $logic получена разговорная группа $tg"
+  # puts "Логическим ядром $logic принята разговорная группа $tg"
   #if {$tg > 0} {
   #  playDtmf "1$tg" "500" "50"
   #}

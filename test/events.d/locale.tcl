@@ -12,6 +12,9 @@
 #
 #   word -- The word to spell
 #
+
+
+
 proc spellWord {word} {
   variable Logic::CFG_PHONETIC_SPELLING
   set word [string tolower $word];
@@ -608,9 +611,17 @@ proc playNumberWithUnit {number unit} {
 	playUnit $unit $number
 }
 
+set script_dir [file dirname [file normalize [info script]]]
+set mock_file [file join $script_dir "test" "mocks.tcl"]  ;# Правильное формирование пути
+set dict_file [file join $script_dir "test" "dict.tcl"]  ;# Правильное формирование пути
 
-# TODO: проверить как работает playSubcommands и при необходимости исправить ее также (в части произнесения доступных подкоманд)
+if {[file exists $mock_file]} {
+    puts "\n\033\[31mВключен режим имитации голосовых оповещений\033\[0m"
+    source $dict_file
+	source $mock_file  
+} else {
+    puts "Система работает в обычном режиме"
+}
 
-#
-# This file has not been truncated
-#
+
+

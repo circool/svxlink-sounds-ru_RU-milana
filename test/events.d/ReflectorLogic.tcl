@@ -115,7 +115,7 @@ proc report_tg_status {} {
   variable prev_announce_time
   variable prev_announce_tg
   variable reflector_connection_established
-  playSilence 100
+  
   playMsg "Core" "reflector"
   if {$reflector_connection_established} {
     playMsg "Core" "connected"
@@ -127,8 +127,6 @@ proc report_tg_status {} {
     set prev_announce_time [clock seconds]
     set prev_announce_tg $selected_tg
     playMsg "Core" "selected_tg"
-    # playMsg "Core" "activef"
-    # playMsg "Core" "talk_group"
     say_talkgroup $selected_tg
   } else {
     playMsg "Core" "previous"
@@ -149,15 +147,14 @@ proc report_tg_status {} {
 #   old_tg -- The talk group that was active
 #
 proc tg_selected {new_tg old_tg} {
-  #puts "### tg_selected #$new_tg (old #$old_tg)"
+  
   # Reject incoming Echolink connections while a talkgroup is active
   #if {$new_tg != 0} {
   #  setConfigValue "ModuleEchoLink" "REJECT_INCOMING" "^.*$"
   #} else {
   #  setConfigValue "ModuleEchoLink" "REJECT_INCOMING" "^$"
   #}
-  # playMsg "Core" "activef"
-  # playMsg "Core" "talk_group"
+  
   playMsg "Core" "selected_tg"
   say_talkgroup $new_tg
 }
@@ -185,8 +182,7 @@ proc tg_local_activation {new_tg old_tg} {
       playMsg "Core" "disconnected"
       playSilence 200
     }
-    # playMsg "Core" "activef"
-    # playMsg "Core" "talk_group"
+    
     playMsg "Core" "local"
     playMsg "Core" "selected_tg"
     say_talkgroup $new_tg
@@ -215,8 +211,7 @@ proc tg_remote_activation {new_tg old_tg} {
     set prev_announce_time $now
     set prev_announce_tg $new_tg
     playSilence 100
-    # playMsg "Core" "activef"
-    # playMsg "Core" "talk_group"
+    
     playMsg "Core" "remote1"
     playMsg "Core" "selected_tg"
     say_talkgroup $new_tg
@@ -257,8 +252,6 @@ proc tg_command_activation {new_tg old_tg} {
     playMsg "Core" "disconnected"
     playSilence 200
   }
-  # playMsg "Core" "activef"
-  # playMsg "Core" "talk_group"
   playMsg "Core" "selected_tg"
   say_talkgroup $new_tg
 }
@@ -279,16 +272,17 @@ proc tg_default_activation {new_tg old_tg} {
   if {$new_tg != $old_tg} {
    set prev_announce_time [clock seconds]
    set prev_announce_tg $new_tg
-   playSilence 100
+   
    if {!$reflector_connection_established} {
      playMsg "Core" "reflector"
      playMsg "Core" "disconnected"
-     playSilence 200
+     
    }
    playMsg "Core" "talk_group"
    playMsg "Core" "default"
    say_talkgroup $new_tg
   }
+  playSilence 200
 }
 
 
@@ -326,15 +320,13 @@ proc tg_qsy {new_tg old_tg} {
 #   tg -- The talk group that has been activated
 #
 proc tg_qsy_on_sql {tg} {
-  playSilence 100
-  
   playMsg "Core" "qsy"
   playMsg "Core" "in"
   playMsg "Core" "talk_group1"
   say_talkgroup $tg
   playMsg "Core" "executedm"
   playMsg "Core" "due_sql"
-
+  playSilence 100
 }
 
 
@@ -346,14 +338,12 @@ proc tg_qsy_on_sql {tg} {
 #
 proc tg_qsy_failed {} {
   #puts "### tg_qsy_failed"
-  playSilence 100
-  
-  playSilence 200
   playMsg "Core" "not"
   playMsg "Core" "success"
   playMsg "Core" "qsy2"
   playMsg "Core" "in"
   playMsg "Core" "talk_group1"
+  playSilence 200
 }
 
 
@@ -382,7 +372,6 @@ proc tg_qsy_pending {tg} {
 #
 proc tg_qsy_ignored {tg} {
   variable qsy_pending_active
-  playSilence 100
   if {!$qsy_pending_active} {
     playMsg "Core" "request"
     playMsg "Core" "on"
@@ -462,10 +451,11 @@ proc talker_stop {tg callsign} {
 #
 proc tmp_monitor_add {tg} {
   #puts "### tmp_monitor_add: $tg"
-  playSilence 100
+  
   playMsg "Core" "activating"
   playMsg "Core" "talk_group_monitoring"
   say_talkgroup $tg
+  playSilence 100
 }
 
 

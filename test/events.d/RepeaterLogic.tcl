@@ -15,7 +15,7 @@ namespace eval RepeaterLogic {
 # Checking to see if this is the current logic core type
 #
 if {$logic_name != [namespace tail [namespace current]]} {
-  puts "not valid logic"
+  # puts "not valid logic"
   return;
 }
 
@@ -254,7 +254,7 @@ proc repeater_down {reason} {
   set repeater_is_up 0;
 
   if {$reason == "SQL_FLAP_SUP"} {
-    playSilence 500;
+    
     playMsg "Core" "repeater";
     playMsg "Core" "deactivating"
     playMsg "Core" "interference";

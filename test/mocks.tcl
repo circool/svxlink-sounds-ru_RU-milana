@@ -1,5 +1,5 @@
 # Словарь для преобразования имен файлов в слова
-source [file join [file dirname [info script]] dict.tcl]
+
 
 
 # Процедуры для имитации воспроизведения сообщения
@@ -29,21 +29,36 @@ proc playMsg { modulename playingWord {warn 1}} {
 	
 }
 
-proc playSilence {param} {	
-	if { $::showPauses } {
-		set value [expr {int($param)}]
-		if {$value < 200} {
-			puts -nonewline ","
-		} else {
-			puts -nonewline "."
-		}
-	} else {
-		return
-	}
+proc playSilence {value} {	
+    set value [expr {int($value)}]
+    if { ![info exists ::debugMode] } {
+        if {$value < 100} {
+            puts ","
+        } else {
+           puts "." 
+        }
+        return;
+    } else {
+        if { $::showPauses } {
+            
+            if {$value < 200} {
+                puts -nonewline ","
+            } else {
+                puts -nonewline "."
+            }
+        } 
+        # else {
+        #     if {$value < 200} {
+        #         puts ""
+        #     } else {
+        #         puts "" 
+        #     }     
+        # }
+    }   
 }
 
 proc playTone { arg1 arg2 arg3 } {
-	puts "звучит тон $arg1 $arg2 $arg3"
+	puts -nonewline "звучит тон $arg1 $arg2 $arg3 "
 }
 
 
@@ -51,50 +66,50 @@ proc playTone { arg1 arg2 arg3 } {
 proc playSubcommands {context basename {header ""}} {
     global wordMap
     
-    # Проверяем наличие заголовка и воспроизводим его
-    if {$header != ""} {
-        playSilence 500
-        # playMsg $context $header
-        playMsg "Core" $header
-    }
-
     # Получаем все возможные ключи для данного контекста
     if {![dict exists $wordMap $context]} {
         puts "\033\[31m*** WARNING: Контекст '$context' не найден в словаре.\033\[0m"
         return
     }
-
+    
     # Фильтруем ключи по базовому имени
     set subcommands [dict keys [dict get $wordMap $context]]
     set filtered_subcommands [list]
+    
+    
+    # Проверяем наличие заголовка и воспроизводим его
     
     foreach subcmd $subcommands {
         if {[string match "${basename}*" $subcmd]} {
             lappend filtered_subcommands $subcmd
         }
     }
+    
+    set subcommands_count [llength $filtered_subcommands]
+    # puts "subcommands_count=$subcommands_count"
+    if {$header != "" && $subcommands_count > 0} {
+        playMsg "Core" $header 
+        # Сортируем подкоманды по номеру
+        set sorted_subcommands [lsort -dictionary $filtered_subcommands]
 
-    # Сортируем подкоманды по номеру
-    set sorted_subcommands [lsort -dictionary $filtered_subcommands]
-
-    # Воспроизводим каждую подкоманду
-    foreach subcmd $sorted_subcommands {
-        # Извлекаем номер и символы из имени подкоманды
-        if {[regexp {^(\d+)([ABCD*#]*)$} [string range $subcmd [string length $basename] end] -> number chars]} {
-            playSilence 200
-            
-            if {$chars == "*"} {
-                set chars [getUnitSuffix $chars $number]
-                playNumberWithUnit $number "star"
-
-            } else {
-               playNumber $number
-               spellWord $chars 
-               
+        # Воспроизводим каждую подкоманду
+        foreach subcmd $sorted_subcommands {
+            # Извлекаем номер и символы из имени подкоманды
+            if {[regexp {^(\d+)([ABCD*#]*)$} [string range $subcmd [string length $basename] end] -> number chars]} {
+                playSilence 200
+                
+                if {$chars == "*"} {
+                    set chars [getUnitSuffix $chars $number]
+                    playNumberWithUnit $number "star"
+                } else {
+                playNumber $number
+                spellWord $chars 
+                
+                }
+                playMsg $context $subcmd
+                playSilence 200
+                
             }
-            playMsg $context $subcmd
-            playSilence 200
-            
         }
-    }
+    }  
 }

@@ -99,8 +99,10 @@ proc choose_module {module_list} {
 # Executed when the user selects a non-existing module.
 #
 proc no_such_module {module_id} {
+  Module::playCoreMsg "module"
   playNumber $module_id;
-  playMsg "no_such_module";
+  Module::playCoreMsg "not";
+  Module::playCoreMsg "found";
 }
 
 
