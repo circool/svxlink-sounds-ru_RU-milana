@@ -1,0 +1,47 @@
+Debug: options = {
+    {af.arg "" "Путь к каталогу с .wav файлами"}
+    {audio.arg "" "Алиас для -af"}
+    {df.arg "" "Путь к каталогу/файлу с определениями"}
+    {definition.arg "" "Алиас для -df"}
+    {of.arg "./dict.tcl" "Путь к выходному файлу"}
+    {output.arg "./dict.tcl" "Алиас для -of"}
+    {priority.arg "audio" "Приоритет обработки (audio|definition|dict)"}
+    {dict.arg "" "Дополнительный словарь"}
+    {report.arg "" "Каталог для отчета"}
+    {delete_wrong "" "Удалить неподдерживаемые файлы"}
+    {help "" "Показать справку"}
+    {? "" "Показать справку"}
+}
+Debug: argv = {-af ru_RU_yandex -df make_audio/definition/ru_RU_yandex --report ./logs}
+gen_dict_new options:
+ -af value            Путь к каталогу с .wav файлами <>
+ -audio value         Алиас для -af <>
+ -df value            Путь к каталогу/файлу с определениями <>
+ -definition value    Алиас для -df <>
+ -of value            Путь к выходному файлу <./dict.tcl>
+ -output value        Алиас для -of <./dict.tcl>
+ -priority value      Приоритет обработки (audio|definition|dict) <audio>
+ -dict value          Дополнительный словарь <>
+ -report value        Каталог для отчета <>
+ -delete_wrong        
+ -help                
+ -?                   
+ -help                Print this message
+ -?                   Print this message
+
+gen_dict_new Использование:
+ -af value            Путь к каталогу с .wav файлами <>
+ -audio value         Алиас для -af <>
+ -df value            Путь к каталогу/файлу с определениями <>
+ -definition value    Алиас для -df <>
+ -of value            Путь к выходному файлу <./dict.tcl>
+ -output value        Алиас для -of <./dict.tcl>
+ -priority value      Приоритет обработки (audio|definition|dict) <audio>
+ -dict value          Дополнительный словарь <>
+ -report value        Каталог для отчета <>
+ -delete_wrong        
+ -help                
+ -?                   
+ -help                Print this message
+ -?                   Print this message
+
