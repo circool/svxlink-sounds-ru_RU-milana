@@ -4,3 +4,4 @@
 .idea
 creditians
 originals/*
+*.code-workspace

@@ -53,7 +53,7 @@ if {$logic_name != [namespace tail [namespace current]]} {
 }
 
 
-#
+# выбрана разговорная группа ...
 # A helper function for announcing a talkgroup.
 # If there is an audio clip matching the name talk_group-<tg> it will be played
 # instead of spelling the digits. Look at the documentation for playMsg for
@@ -70,7 +70,7 @@ proc say_talkgroup {tg} {
 }
 
 
-#
+# Logic <- неизвестная команда
 # Executed when an unknown command is received
 #   cmd - The command string
 #
@@ -79,7 +79,7 @@ proc unknown_command {cmd} {
 }
 
 
-#
+# Logic <- не удалось выполнить команду ...
 # Executed when a received command fails
 #
 proc command_failed {cmd} {
@@ -96,11 +96,11 @@ proc reflector_connection_status_update {is_established} {
   variable reflector_connection_established
   if {$is_established != $reflector_connection_established} {
     set reflector_connection_established $is_established
-    playMsg "Core" "reflector"
+    # playMsg "Core" "reflector"
     if {$is_established} {
-     playMsg "Core" "connected"
+     playMsg "Core" "reflector_connected"
     } else {
-     playMsg "Core" "disconnected"
+     playMsg "Core" "reflector_disconnected"
     }
   }
 }
@@ -116,21 +116,19 @@ proc report_tg_status {} {
   variable prev_announce_tg
   variable reflector_connection_established
   
-  playMsg "Core" "reflector"
-  if {$reflector_connection_established} {
-    playMsg "Core" "connected"
-  } else {
-    playMsg "Core" "disconnected"
-  }
+  # рефлектор подключен/отключен
+  reflector_connection_status_update $reflector_connection_established
+
   playSilence 200
+  
   if {$selected_tg > 0} {
     set prev_announce_time [clock seconds]
     set prev_announce_tg $selected_tg
     playMsg "Core" "selected_tg"
     say_talkgroup $selected_tg
   } else {
-    playMsg "Core" "previous"
-    playMsg "Core" "talk_group"
+    playMsg "Core" "previous_tg"
+    # playMsg "Core" "talk_group"
     say_talkgroup $previous_tg
   }
 }
@@ -155,8 +153,8 @@ proc tg_selected {new_tg old_tg} {
   #  setConfigValue "ModuleEchoLink" "REJECT_INCOMING" "^$"
   #}
   
-  playMsg "Core" "selected_tg"
-  say_talkgroup $new_tg
+  # playMsg "Core" "selected_tg"
+  # say_talkgroup $new_tg
 }
 
 
@@ -227,7 +225,7 @@ proc tg_remote_activation {new_tg old_tg} {
 #   old_tg -- The talk group that was active
 #
 proc tg_remote_prio_activation {new_tg old_tg} {
-  playMsg "Core" "priority"
+  # playMsg "Core" "priority"
   tg_remote_activation $new_tg $old_tg
 }
 
@@ -264,25 +262,25 @@ proc tg_command_activation {new_tg old_tg} {
 #   old_tg -- The talk group that was active
 #
 proc tg_default_activation {new_tg old_tg} {
-  variable prev_announce_time
-  variable prev_announce_tg
-  variable selected_tg
-  variable reflector_connection_established
+  # variable prev_announce_time
+  # variable prev_announce_tg
+  # variable selected_tg
+  # variable reflector_connection_established
   # puts "### tg_default_activation"
-  if {$new_tg != $old_tg} {
-   set prev_announce_time [clock seconds]
-   set prev_announce_tg $new_tg
+  # if {$new_tg != $old_tg} {
+  #  set prev_announce_time [clock seconds]
+  #  set prev_announce_tg $new_tg
    
-   if {!$reflector_connection_established} {
-     playMsg "Core" "reflector"
-     playMsg "Core" "disconnected"
+  #  if {!$reflector_connection_established} {
+  #    playMsg "Core" "reflector"
+  #    playMsg "Core" "disconnected"
      
-   }
-   playMsg "Core" "talk_group"
-   playMsg "Core" "default"
-   say_talkgroup $new_tg
-  }
-  playSilence 200
+  #  }
+  #  playMsg "Core" "talk_group"
+  #  playMsg "Core" "default"
+  #  say_talkgroup $new_tg
+  # }
+  # playSilence 200
 }
 
 
@@ -397,20 +395,20 @@ proc tg_qsy_ignored {tg} {
 #
 proc tg_selection_timeout {new_tg old_tg} {
    
-  playMsg "Core" "qsy"
-  playMsg "Core" "due_timeout"
-  playMsg "Core" "in"
-  playMsg "Core" "talk_group1"
-  say_talkgroup $new_tg
+  # playMsg "Core" "qsy"
+  # playMsg "Core" "due_timeout"
+  # playMsg "Core" "in"
+  # playMsg "Core" "talk_group1"
+  # say_talkgroup $new_tg
   
   #puts "### tg_selection_timeout"
-  # if {$old_tg != 0} {
-  #   playSilence 100
-  #   playTone 880 200 50
-  #   playTone 659 200 50
-  #   playTone 440 200 50
-  #   playSilence 100
-  # }
+  if {$old_tg != 0} {
+    playSilence 100
+    playTone 880 200 50
+    playTone 659 200 50
+    playTone 440 200 50
+    playSilence 100
+  }
 }
 
 
