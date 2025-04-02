@@ -1,16 +1,19 @@
 #!/usr/bin/env tclsh
-global argv debugMode module_name module_list CFG_TYPE logic_name mycall report_ctcss langdir debug_active_module showPauses
+global argv debugMode module_name module_list CFG_TYPE logic_name mycall report_ctcss langdir debug_active_module showPauses playAudio audioDir
 # описание массивов для тестирования
 source "./assert_data_table/data_files_specs.tcl"
 source "dict.tcl"
 
 # режим тестирования
-set ::debugMode 1
+set ::debugMode 0
+set ::playAudio 0
+# set ::audioDir "../ru_RU"
+set ::audioDir "../ru_RU_yandex"
 set ::showPauses 0
 set ::debug_active_module 0
 
 
-variable active_module "MetarInfo"
+variable active_module "EchoLink"
 
 # различные переменные
 set mycall "R2ADU"
@@ -24,7 +27,7 @@ variable list_languages {ru_RU en_EN}
 
 source "./envs.tcl"
 source "./mocks.tcl"
-
+source "./test_mode_select.tcl"
 
 
 # Устанавливаем переменную окружения
@@ -46,7 +49,7 @@ if {$debugMode} {
     foreach file $debugFiles {       
         runTestsFromFile $file
     }
-
+    
     puts "\n\033\[33m --- Дуплекс --- \033\[0m"
     set Logic::CFG_TYPE "Repeater"
     foreach file $debugFiles {       

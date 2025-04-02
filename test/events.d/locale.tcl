@@ -612,16 +612,15 @@ proc playNumberWithUnit {number unit} {
 }
 
 set script_dir [file dirname [file normalize [info script]]]
-set mock_file [file join $script_dir "test" "mocks.tcl"]  ;# Правильное формирование пути
-set dict_file [file join $script_dir "test" "dict.tcl"]  ;# Правильное формирование пути
+set mock_file [file join $script_dir "test" "mocks.tcl"]
+set dict_file [file join $script_dir "test" "dict.tcl"]
 
-if {[file exists $mock_file]} {
+if {[file exists $mock_file] && [file exists $dict_file]} {
     puts "\n\033\[31mВключен режим имитации голосовых оповещений\033\[0m"
     source $dict_file
-	source $mock_file  
+    source $mock_file
 } else {
-    puts "Система работает в обычном режиме"
+    puts "\n\033\[31mСистема работает в обычном режиме\033\[0m"
 }
-
 
 

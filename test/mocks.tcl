@@ -1,11 +1,24 @@
 # Словарь для преобразования имен файлов в слова
-
+# puts "***DEBUG load mocks.tcl"
 
 
 # Процедуры для имитации воспроизведения сообщения
 
 proc playMsg { modulename playingWord {warn 1}} {
-	# puts "***DEBUG playMsg modulename=$modulename playingWord=$playingWord"
+	if {[info exists ::playAudio]} {
+        variable playAudio
+    } else {
+        variable playAudio 0
+    }
+    
+    
+    
+    if {$playAudio} {
+        set [playAudio $modulename $playingWord] result
+        # return result
+    }
+    
+    # puts "***DEBUG playMsg modulename=$modulename playingWord=$playingWord"
 	
 	# Словарь хранится в dict.tcl
 	global wordMap
@@ -29,36 +42,101 @@ proc playMsg { modulename playingWord {warn 1}} {
 	
 }
 
-proc playSilence {value} {	
-    set value [expr {int($value)}]
-    if { ![info exists ::debugMode] } {
-        if {$value < 100} {
-            puts ","
-        } else {
-           puts "." 
-        }
-        return;
-    } else {
-        if { $::showPauses } {
+# proc playSilence {value} {	
+#     set value [expr {int($value)}]
+#     if { ![info exists ::debugMode] } {
+#         if {$value < 100} {
+#             puts ","
+#         } else {
+#            puts "." 
+#         }
+#         return;
+#     } else {
+#         if { $::showPauses } {
             
-            if {$value < 200} {
-                puts -nonewline ","
-            } else {
-                puts -nonewline "."
-            }
-        } 
-        # else {
-        #     if {$value < 200} {
-        #         puts ""
-        #     } else {
-        #         puts "" 
-        #     }     
-        # }
-    }   
-}
+#             if {$value < 200} {
+#                 puts -nonewline ","
+#             } else {
+#                 puts -nonewline "."
+#             }
+#         } 
+#         # else {
+#         #     if {$value < 200} {
+#         #         puts ""
+#         #     } else {
+#         #         puts "" 
+#         #     }     
+#         # }
+#     }   
+# }
 
 proc playTone { arg1 arg2 arg3 } {
 	puts -nonewline "звучит тон $arg1 $arg2 $arg3 "
+}
+proc playSilence {value} {
+    set value [expr {int($value)}]
+    
+    if {[info exists ::playAudio] && $::playAudio} {
+        # Если включено аудиовоспроизведение, делаем задержку в миллисекундах
+        after $value
+    } else {
+        # Иначе выводим символы паузы в консоль (как было раньше)
+        if { ![info exists ::debugMode] } {
+            if {$value < 100} {
+                puts ","
+            } else {
+                puts "."
+            }
+        } else {
+            if { $::showPauses } {
+                if {$value < 200} {
+                    puts -nonewline ","
+                } else {
+                    puts -nonewline "."
+                }
+            }
+        }
+    }
+}
+
+# Процедура для воспроизведения аудиофайла
+
+proc getAudioDuration {file} {
+    if {[catch {exec soxi -D $file} duration]} {
+        return 0  ; # Если soxi нет, возвращаем 0
+    }
+    return [expr {int($duration * 1000)}]  ; # Длительность в мс
+}
+
+
+# Процедура для воспроизведения аудиофайла
+proc playAudio {modulename playingWord {warn 1}} {
+    # Формируем путь к аудиофайлу
+    variable ::audioDir
+
+    set audioFile "$audioDir/$modulename/$playingWord.wav"
+    set duration [getAudioDuration $audioFile]
+    if {$duration < 1000} { set duration 0 }
+    
+    # Проверяем существование файла
+    if {![file exists $audioFile]} {
+        if {$warn} {
+            puts "\033\[31m*** WARNING: Аудиофайл '$audioFile' не найден.\033\[0m"
+        }
+        return 0
+    }
+    
+    # Если есть текущий процесс воспроизведения, ждем его завершения
+    if {[info exists ::audioPlayerPID]} {
+        catch {exec kill -0 $::audioPlayerPID}  ; # Проверяем существует ли процесс
+        catch {exec wait $::audioPlayerPID}    ; # Ждем завершения процесса
+        unset ::audioPlayerPID                  ; # Очищаем PID после завершения
+    }
+    
+    # Воспроизводим аудиофайл синхронно (без &)
+    set ::audioPlayerPID [exec afplay $audioFile]
+    
+    return 1
 }
 
 
