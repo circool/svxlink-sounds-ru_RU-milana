@@ -1,30 +1,30 @@
 puts "loading enveropment"
 
+global langdir
 
-
-source "./events.d/locale.tcl"
+source "$langdir/events.d/local/locale.tcl"
 
 namespace eval DtmfRepeater {
 	variable CFG_ID "4";	
 }
-source "./events.d/DtmfRepeater.tcl"
+source "$langdir/events.d/local/DtmfRepeater.tcl"
 
 namespace eval EchoLink {
 	variable CFG_ID "2"; 
 	variable CFG_LOCAL_RGR_SOUND
 	set CFG_LOCAL_RGR_SOUND 1
 }
-source "./events.d/EchoLink.tcl"
+source "$langdir/events.d/local/EchoLink.tcl"
 
 namespace eval Frn {
 	variable CFG_ID "7"; 	
 }
-source "./events.d/Frn.tcl"
+source "$langdir/events.d/local/Frn.tcl"
 
 namespace eval Help {
 	variable CFG_ID "0";
 }
-source "./events.d/Help.tcl"
+source "$langdir/events.d/local/Help.tcl"
 
 namespace eval Logic {
 	variable CFG_TIME_FORMAT
@@ -33,65 +33,65 @@ namespace eval Logic {
 		set CFG_TIME_FORMAT 24
 	}
 }	
-source "./events.d/Logic.tcl"
+source "$langdir/events.d/local/Logic.tcl"
 
 # namespace eval CW {}
-source "./events.d/CW.tcl"
+source "$langdir/events.d/local/CW.tcl"
 
 namespace eval MetarInfo {
 	variable CFG_ID "5";  
 }
-source "./events.d/MetarInfo.tcl"
+source "$langdir/events.d/local/MetarInfo.tcl"
 
 namespace eval Module {
 	variable activating_module 1
 }
-source "./events.d/Module.tcl"
+source "$langdir/events.d/local/Module.tcl"
 
 namespace eval Parrot {
 	variable CFG_ID "1"
 }
-source "./events.d/Parrot.tcl"
+source "$langdir/events.d/local/Parrot.tcl"
 
 namespace eval PropagationMonitor {
 	variable CFG_ID "10"
 }
-source "./events.d/PropagationMonitor.tcl"
+source "$langdir/events.d/local/PropagationMonitor.tcl"
 
 set logic_name "ReflectorLogic"
 namespace eval ReflectorLogic {
 	variable CFG_ID "9"
 	variable reflector_connection_established 0
 }
-source "./events.d/ReflectorLogic.tcl"
+source "$langdir/events.d/local/ReflectorLogic.tcl"
 
 set logic_name "RepeaterLogic"
 # namespace eval RepeaterLogic {}
-source "./events.d/RepeaterLogic.tcl"
+source "$langdir/events.d/local/RepeaterLogic.tcl"
 
 set logic_name "SimplexLogic"
 # namespace eval SimplexLogic {}
-source "./events.d/SimplexLogic.tcl"
+source "$langdir/events.d/local/SimplexLogic.tcl"
 
 # namespace eval SelCall {}
-source "./events.d/SelCall.tcl"
+source "$langdir/events.d/local/SelCall.tcl"
 
 namespace eval SelCallEnc {
 	variable CFG_ID "6"
 }
-source "./events.d/SelCallEnc.tcl"
+source "$langdir/events.d/local/SelCallEnc.tcl"
 
 
 
 namespace eval TclVoiceMail {
 	variable CFG_ID "3"
 }
-source "./events.d/TclVoiceMail.tcl"
+source "$langdir/events.d/local/TclVoiceMail.tcl"
 
 namespace eval Trx {
 	variable CFG_ID "8"
 }
-source "./events.d/Trx.tcl"
+source "$langdir/events.d/local/Trx.tcl"
 
 # variable script_path ""
 # source "./events.tcl"

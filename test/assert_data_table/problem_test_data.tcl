@@ -1,4 +1,4 @@
 set dataTests {
 	
-	{"EchoLink::activating_module" "включается модуль Эхо линк"}
+	{"MetarInfo::rvr"  32 left rvr 1800 unit_meters increasing "взлетно посадочная полоса тридцать два левая видимость на взлетно посадочной полосе одна тысяча восемьсот метров повышается"}
 }	

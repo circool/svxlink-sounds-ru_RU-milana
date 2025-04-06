@@ -5,15 +5,15 @@ source "./assert_data_table/data_files_specs.tcl"
 source "dict.tcl"
 
 # режим тестирования
-set ::debugMode 0
+set ::debugMode 1
 set ::playAudio 0
 # set ::audioDir "../ru_RU"
 set ::audioDir "../ru_RU_yandex"
 set ::showPauses 0
-set ::debug_active_module 0
+set ::debug_active_module 1
 
 
-variable active_module "EchoLink"
+variable active_module "MetarInfo"
 
 # различные переменные
 set mycall "R2ADU"
@@ -21,7 +21,7 @@ set report_ctcss "88.5"
 variable loaded_modules "ModuleEchoLink ModuleFrn ModuleMetarInfo ModuleHelp ModuleParrot"
 #
 
-set langdir "../ru_RU"
+set langdir "../ru_RU_yandex"
 variable list_languages {ru_RU en_EN}
 
 
