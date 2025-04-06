@@ -94,7 +94,7 @@ proc play_sel_call {cmd} {
 
   # FIXME: We should not read the variants array directly from the module implementation
   if {[string range $cmd 0 1] > [array size variants]} {
-    playMsg "operation_failed"
+    Logic::operation_failed
   } else {
     SelCall::setMode $variants([string range $cmd 0 1])
     SelCall::play [string range $cmd 2 end]

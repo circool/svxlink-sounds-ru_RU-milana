@@ -111,15 +111,13 @@ proc set_frequency {fq} {
 
 proc no_matching_band {cmd} {
   #printInfo "### No matching band for command: $cmd"
-  spellNumber $cmd
-  playMsg "operation_failed"
+  Logic::operation_failed $cmd
 }
 
 
 proc failed_to_set_trx {cmd rx_name tx_name} {
   #printInfo "### Failed to set transceiver: cmd=$cmd RX=$rx_name TX=$tx_name"
-  spellNumber $cmd
-  playMsg "operation_failed"
+  Logic::operation_failed $cmd
 }
 
 

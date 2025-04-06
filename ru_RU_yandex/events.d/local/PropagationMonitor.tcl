@@ -102,14 +102,13 @@ proc status_report {} {
 }
 
 
-#
+# Logic <- Неизвестрая команда ...
 # Called when an illegal command has been entered
 #
 #   cmd - The received command
 #
 proc unknown_command {cmd} {
-  playNumber $cmd
-  playMsg "unknown_command"
+  Logic::unknown_command $cmd;
 }
 
 

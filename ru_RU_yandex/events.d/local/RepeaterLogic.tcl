@@ -113,7 +113,7 @@ proc macro_another_active_module {} {
 }
 
 
-#
+# Logic <- неизвестная команда ...
 # Executed when an unknown DTMF command is entered
 #
 proc unknown_command {cmd} {
@@ -121,7 +121,7 @@ proc unknown_command {cmd} {
 }
 
 
-#
+# Logic <- Команда ... не выполнена
 # Executed when an entered DTMF command failed
 #
 proc command_failed {cmd} {

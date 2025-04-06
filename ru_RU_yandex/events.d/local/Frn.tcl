@@ -96,9 +96,7 @@ proc status_report {} {
 # Executed when an entered command failed or have bad syntax.
 #
 proc command_failed {cmd} {
-  Module::playCoreMsg "command";
-  spellWord $cmd;
-  Module::playCoreMsg "_not_executedf";
+  Logic::command_failed $cmd
 }
  
  
@@ -106,8 +104,7 @@ proc command_failed {cmd} {
 # Executed when an unrecognized command has been received.
 #
 proc unknown_command {cmd} {
-  Module::playCoreMsg "unknownf_command";
-  spellWord $cmd;
+  Logic::unknown_command $cmd;
 }
 
 

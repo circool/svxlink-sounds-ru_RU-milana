@@ -128,7 +128,7 @@ proc status_report {} {
 # Called when a fatal module error ocurrs after which the module is deactivated
 #
 proc module_error {} {
-  playMsg "operation_failed"
+  Logic::operation_failed
 }
 
 

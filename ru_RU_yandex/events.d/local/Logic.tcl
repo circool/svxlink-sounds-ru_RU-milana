@@ -64,6 +64,7 @@ variable sql_rx_id "?";
 # Executed when the SvxLink software is started
 #
 proc startup {} {
+  return;
   playMsg "Core" "online"
   
   # Вместо краткой идентификации воспроизводим фразу
@@ -89,12 +90,12 @@ proc startup {} {
 proc no_such_module {module_id} {
   playMsg "Core" "module"
   playNumber $module_id;
-  playMsg "Core" "not";
-  playMsg "Core" "found";
+  playMsg "Core" "not_found";
 }
 
 
 # ручная идентификация
+# добавлено произношение "симплексный узел" для логики Simplex
 # Executed when a manual identification is initiated with the * DTMF code
 #
 proc manual_identification {} {
@@ -297,9 +298,7 @@ proc send_rgr_sound {} {
 # Executed when an empty macro command (i.e. D#) has been entered.
 #
 proc macro_empty {} {
-  playMsg "Core" "receivedf"; 
-  playMsg "Core" "emptyf";
-  playMsg "Core" "macro";
+  playMsg "Core" "received_empty_macro"; 
 }
 
 
@@ -307,9 +306,7 @@ proc macro_empty {} {
 # Executed when an entered macro command could not be found
 #
 proc macro_not_found {} {
-  playMsg "Core" "macro";
-  playMsg "Core" "not";
-  playMsg "Core" "foundf";
+  playMsg "Core" "macro_not_found";
   playSilence 200
 
 }
@@ -319,8 +316,7 @@ proc macro_not_found {} {
 # Executed when a macro syntax error occurs (configuration error).
 #
 proc macro_syntax_error {} {
-  playMsg "Core" "macro";
-  playMsg "Core" "has_error";
+  playMsg "Core" "macro_has_error";
   playSilence 200
 
 }
@@ -331,12 +327,10 @@ proc macro_syntax_error {} {
 # (configuration error).
 #
 proc macro_module_not_found {} {
-  playMsg "Core" "macro";
-  playMsg "Core" "has_error";
+  playMsg "Core" "macro_has_error";
   playSilence 100;
   playMsg "Core" "module";
-  playMsg "Core" "not";
-  playMsg "Core" "found";
+  playMsg "Core" "not_found";
   playSilence 200
 }
 
@@ -346,26 +340,19 @@ proc macro_module_not_found {} {
 # failed.
 #
 proc macro_module_activation_failed {} {  
-  playMsg "Core" "not";
-  playMsg "Core" "success";
-  playMsg "Core" "turn_on";
-  playMsg "Core" "module";
+  playMsg "Core" "module_enable_failed";
   playSilence 200
 }
 
 
-# невозможно включить модуль пока активен модуль ...
+# невозможно включить другой модуль, пока активен модуль ...
 # Executed when a macro command is executed that requires a module to
 # be activated but another module is already active.
 #
 proc macro_another_active_module {} {
   global active_module;
-  playMsg "Core" "not_forbidden";
-  playMsg "Core" "turn_on";
-  playMsg "Core" "module";
-  playMsg "Core" "until";
-  playMsg "Core" "active1";
-  playMsg "Core" "module";
+  playSilence 100;
+  playMsg "Core" "macro_another_active_module";
   playMsg $active_module "name";
   playSilence 200
 }
@@ -376,26 +363,33 @@ proc macro_another_active_module {} {
 #   cmd - The command string
 #
 proc unknown_command {cmd} {
-  
-  playMsg "Core" "unknownf";
-  playMsg "Core" "command";
+  playMsg "Core" "unknown_command";
   spellWord $cmd;
   playSilence 200
 }
 
 
-# не удалось выполнить команду ...
-# Executed when an entered DTMF command failed
-#   cmd - The command string
+# Команда ... не выполнена
+#
+# Для конманд command_failed из модулей EchoLink и Frn.
 #
 proc command_failed {cmd} {
-  playMsg "Core" "not";
-  playMsg "Core" "success";
-  playMsg "Core" "execute";
-  playMsg "Core" "command1";
+  playMsg "Core" "command_failed_";
   spellWord $cmd;
   playSilence 200
 }
+
+# Операция не удалась [...]
+proc operation_failed {{cmd ""}} {
+  playMsg "Core" "operation_failed"
+  if {$cmd ne ""} {
+    spellWord $cmd
+  }
+  playSilence 200
+}
+
+
+
 
 
 # выполняется соединение с ... 
@@ -404,9 +398,7 @@ proc command_failed {cmd} {
 #
 proc activating_link {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "processing";
-    playMsg "Core" "connection";
-    playMsg "Core" "with";
+    playMsg "Core" "do_attempt_connection";
     spellWord $name;
     playSilence 200
   }
@@ -419,10 +411,9 @@ proc activating_link {name} {
 #
 proc deactivating_link {name} {
   if {[string length $name] > 0} {
-    playMsg "Core" "disconnecting";
-    playMsg "Core" "with";
+    playMsg "Core" "disconnecting_connection_with";
     spellWord $name;
-    playSilence 300
+    playSilence 200
   }
 }
 
@@ -436,14 +427,13 @@ proc link_not_active {name} {
   if {[string length $name] > 0} {
     playMsg "Core" "link";
     spellWord $name;
-    playMsg "Core" "not";
-    playMsg "Core" "active1";
+    playMsg "Core" "not_active";
     playSilence 200
   }
 }
 
 
-# линк ... уже подключен
+# линк ... в активном состоянии
 # Executed when trying to activate a link to another logic core but the
 # link is already active.
 #   name  - The name of the link
@@ -452,8 +442,7 @@ proc link_already_active {name} {
   if {[string length $name] > 0} {
     playMsg "Core" "link";
     spellWord $name;
-    playMsg "Core" "already";
-    playMsg "Core" "active1";
+    playMsg "Core" "already_active";
     playSilence 200
   }
 }
@@ -734,7 +723,6 @@ proc set_language {lang_code} {
 proc list_languages {} {
   global logic_name;
   puts "$logic_name: Available languages: (NOT IMPLEMENTED)";
-
 }
 
 

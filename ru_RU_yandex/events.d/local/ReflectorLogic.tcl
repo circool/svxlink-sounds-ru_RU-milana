@@ -65,12 +65,12 @@ proc say_talkgroup {tg} {
   playMsg "Core" "selected_tg"
   if [playMsg "Core" "talk_group-$tg" 0] {
   } else {
-    spellNumber $tg
+    SplitAndSpeakNumber $tg
   }
 }
 
 
-# Logic <- неизвестная команда
+# Logic <- неизвестная команда ...
 # Executed when an unknown command is received
 #   cmd - The command string
 #
@@ -79,7 +79,7 @@ proc unknown_command {cmd} {
 }
 
 
-# Logic <- не удалось выполнить команду ...
+# Logic <- Команда ... не выполнена
 # Executed when a received command fails
 #
 proc command_failed {cmd} {
@@ -125,11 +125,11 @@ proc report_tg_status {} {
     set prev_announce_time [clock seconds]
     set prev_announce_tg $selected_tg
     playMsg "Core" "selected_tg"
-    say_talkgroup $selected_tg
+    SplitAndSpeakNumber $selected_tg
   } else {
     playMsg "Core" "previous_tg"
     # playMsg "Core" "talk_group"
-    say_talkgroup $previous_tg
+    SplitAndSpeakNumber $previous_tg
   }
 }
 
@@ -154,7 +154,7 @@ proc tg_selected {new_tg old_tg} {
   #}
   
   # playMsg "Core" "selected_tg"
-  # say_talkgroup $new_tg
+  # SplitAndSpeakNumber $new_tg
 }
 
 
@@ -183,7 +183,7 @@ proc tg_local_activation {new_tg old_tg} {
     
     playMsg "Core" "local"
     playMsg "Core" "selected_tg"
-    say_talkgroup $new_tg
+    SplitAndSpeakNumber $new_tg
   }
 }
 
@@ -212,7 +212,7 @@ proc tg_remote_activation {new_tg old_tg} {
     
     playMsg "Core" "remote1"
     playMsg "Core" "selected_tg"
-    say_talkgroup $new_tg
+    SplitAndSpeakNumber $new_tg
   }
 }
 
@@ -251,7 +251,7 @@ proc tg_command_activation {new_tg old_tg} {
     playSilence 200
   }
   playMsg "Core" "selected_tg"
-  say_talkgroup $new_tg
+  SplitAndSpeakNumber $new_tg
 }
 
 
@@ -278,7 +278,7 @@ proc tg_default_activation {new_tg old_tg} {
   #  }
   #  playMsg "Core" "talk_group"
   #  playMsg "Core" "default"
-  #  say_talkgroup $new_tg
+  #  SplitAndSpeakNumber $new_tg
   # }
   # playSilence 200
 }
@@ -301,7 +301,7 @@ proc tg_qsy {new_tg old_tg} {
   playMsg "Core" "qsy"
   playMsg "Core" "in"
   playMsg "Core" "talk_group1"
-  say_talkgroup $new_tg
+  SplitAndSpeakNumber $new_tg
   playSilence 100
   
   
@@ -321,7 +321,7 @@ proc tg_qsy_on_sql {tg} {
   playMsg "Core" "qsy"
   playMsg "Core" "in"
   playMsg "Core" "talk_group1"
-  say_talkgroup $tg
+  SplitAndSpeakNumber $tg
   playMsg "Core" "executedm"
   playMsg "Core" "due_sql"
   playSilence 100
@@ -357,7 +357,7 @@ proc tg_qsy_pending {tg} {
     playMsg "Core" "qsy"
     playMsg "Core" "in"
     playMsg "Core" "talk_group1"
-    say_talkgroup $tg
+    SplitAndSpeakNumber $tg
   
   
 }
@@ -376,7 +376,7 @@ proc tg_qsy_ignored {tg} {
     playMsg "Core" "qsy"
     playMsg "Core" "in"
     playMsg "Core" "talk_group1"
-    say_talkgroup $tg
+    SplitAndSpeakNumber $tg
   }
   playMsg "Core" "ignored"
   # playSilence 500
@@ -399,7 +399,7 @@ proc tg_selection_timeout {new_tg old_tg} {
   # playMsg "Core" "due_timeout"
   # playMsg "Core" "in"
   # playMsg "Core" "talk_group1"
-  # say_talkgroup $new_tg
+  # SplitAndSpeakNumber $new_tg
   
   #puts "### tg_selection_timeout"
   if {$old_tg != 0} {
@@ -452,7 +452,7 @@ proc tmp_monitor_add {tg} {
   
   playMsg "Core" "activating"
   playMsg "Core" "talk_group_monitoring"
-  say_talkgroup $tg
+  SplitAndSpeakNumber $tg
   playSilence 100
 }
 
@@ -465,7 +465,7 @@ proc tmp_monitor_add {tg} {
 proc tmp_monitor_remove {tg} {
   playMsg "Core" "deactivating"
   playMsg "Core" "talk_group_monitoring"
-  say_talkgroup $tg
+  SplitAndSpeakNumber $tg
 }
 
 
@@ -483,47 +483,6 @@ if [info exists ::Logic::CFG_QSY_PENDING_TIMEOUT] {
 # aka circool
 # aka R2ADU
 
-# Произнести имя или номер разговорной группы, разбивая его на группы по 2 или 3 символа 
-proc say_talkgroup {tg} {
-  if [playMsg "Core" "talk_group-$tg" 0] {
-  # Найдена именованная группа
-  } else {
-    # Преобразуем число в строку
-    set tg_str [format "%d" $tg]
-    set len [string length $tg_str]
-
-    # Если длина строки меньше 4, обрабатываем её как одну группу
-    if {$len < 4} {
-      set groups [list $tg_str]
-    } elseif {$len == 4} {
-      # Если длина строки равна 4, разбиваем на две группы по 2 символа
-      set groups [list [string range $tg_str 0 1] [string range $tg_str 2 3]]
-    } else {
-      # Если длина строки больше 4, разбиваем на группы по 3 символа
-      set groups [list]
-      for {set i 0} {$i < $len} {incr i 3} {
-        lappend groups [string range $tg_str $i [expr {$i + 2}]]
-      }
-    }
-
-    # Обрабатываем каждую группу
-    foreach group $groups {
-      # Лидирующие нули отправляем по одному
-      while {[string index $group 0] eq "0"} {
-        playNumberUnit 0 "male"
-        set group [string range $group 1 end]
-      }
-      # Если в группе остались символы, отправляем их
-      if {$group ne ""} {
-        playNumberUnit $group "male"
-      }
-      # Добавляем паузу, если это не последняя группа
-      if {$group != [lindex $groups end]} {
-        playSilence 200
-      }
-    }
-  }
-}
 
 
 

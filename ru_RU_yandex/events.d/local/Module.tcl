@@ -17,11 +17,11 @@ proc playCoreMsg {msg} {
 # Executed when a module is being activated
 #
 proc activating_module {module_name} {
-  # playMsg "Core" "activating";
-  # playMsg "Core" "module";
+  puts "$module_name: Модуль включается"
+  playSilence 100;
   playMsg "Core" "module_activating";
   playMsg $module_name "name";
-  playSilence 500;
+  playSilence 200;
 }
 
 
@@ -29,25 +29,21 @@ proc activating_module {module_name} {
 # Executed when a module is being deactivated.
 #
 proc deactivating_module {module_name} {
-  # playMsg "Core" "deactivating";
-  # playMsg "Core" "module"; 
-  # playSilence 100;
+  puts "$module_name: Модуль выключается"
+  playSilence 100;
   playMsg "Core" "module_deactivating";
   playMsg $module_name "name";
-  playSilence 500;
+  playSilence 200;
 }
 
 
-# модуль ... отключен по тайм-ауту
+# модуль ... отключен по тайм-ауту -> Тейм-аут
 # Executed when the inactivity timeout for a module has expired.
 #
-proc timeout {module_name} {
-  
-  playMsg "Core" "module";
-  playMsg $module_name "name";
-  playMsg "Core" "disconnected";
-  playMsg "Core" "with_timeout";
-  playSilence 500;
+proc timeout {module_name} {  
+  puts "$module_name: Таймаут модуля "
+  playMsg "Core" "timeout";
+  playSilence 200;
 }
 
 

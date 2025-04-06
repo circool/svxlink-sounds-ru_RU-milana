@@ -76,7 +76,8 @@ proc timeout {} {
 }
 
 
-#
+# Программно зашита справка по команде "say metarhelp"
+# Нужно сделать мягкую ссылку на metarhelp.wav для help.wav
 # Executed when playing of the help message for this module has been requested.
 #
 proc play_help {} {
@@ -369,18 +370,53 @@ proc ceilingvaries {from to} {
    playSilence 200;
 }
 
-# runway visual range
+# # runway visual range
+# proc rvr args {
+#    playMsg "runway";
+#    foreach item $args {
+#      if [regexp {(\d+)} $item] {
+#       playNumberUnit $item "male";
+#      } else {
+#        playMsg $item;
+#      }
+#      playSilence 100;
+#    }
+#    playSilence 200;
+# }
 proc rvr args {
-   playMsg "rwy";
-   foreach item $args {
-     if [regexp {(\d+)} $item] {
-      playNumberUnit $item "male_range";
-     } else {
-       playMsg $item;
-     }
-     playSilence 100;
-   }
-   playSilence 200;
+    playMsg "runway"
+    set i 0
+    set len [llength $args]
+    
+    while {$i < $len} {
+        set current [lindex $args $i]
+        
+        # Проверяем, является ли текущий элемент числом и есть ли следующий элемент с unit_*
+        if {[regexp {^\d+$} $current] && $i+1 < $len} {
+            set next [lindex $args $i+1]
+            if {[string match "unit_*" $next]} {
+                # Обрабатываем пару число + unit_*
+                if {[string index $next end] eq "s"} {
+                    set next [string range $next 0 end-1]
+                }
+                
+                playNumberWithUnit $current $next
+                incr i 2
+                playSilence 100
+                continue
+            }
+        }
+        
+        # Обычная обработка одиночных элементов
+        if {[regexp {^\d+$} $current]} {
+            playNumberUnit $current "male"
+        } else {
+            playMsg $current
+        }
+        incr i
+        playSilence 100
+    }
+    playSilence 200
 }
 
 

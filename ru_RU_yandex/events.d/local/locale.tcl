@@ -612,3 +612,77 @@ proc playNumberWithUnit {number unit} {
 }
 
 
+# Произнести номер, разбивая его на группы по 2 или 3 символа 
+proc SplitAndSpeakNumber {tg} {
+    # Преобразуем число в строку
+    set tg_str [format "%d" $tg]
+    set len [string length $tg_str]
+
+    # Если длина строки меньше 4, обрабатываем её как одну группу
+    if {$len < 4} {
+      set groups [list $tg_str]
+    } elseif {$len == 4} {
+      # Если длина строки равна 4, разбиваем на две группы по 2 символа
+      set groups [list [string range $tg_str 0 1] [string range $tg_str 2 3]]
+    } else {
+      # Если длина строки больше 4, разбиваем на группы по 3 символа
+      set groups [list]
+      for {set i 0} {$i < $len} {incr i 3} {
+        lappend groups [string range $tg_str $i [expr {$i + 2}]]
+      }
+    }
+
+    # Обрабатываем каждую группу
+    foreach group $groups {
+      # Лидирующие нули отправляем по одному
+      while {[string index $group 0] eq "0"} {
+        playNumberUnit 0 "male"
+        set group [string range $group 1 end]
+      }
+      # Если в группе остались символы, отправляем их
+      if {$group ne ""} {
+        playNumberUnit $group "male"
+      }
+      # Добавляем паузу, если это не последняя группа
+      if {$group != [lindex $groups end]} {
+        playSilence 200
+      }
+    }
+}
+
+# Аудиоклип "Доступные под-команды" перенесен в Core
+# Play a range of subcommand description files. The file names must be on the
+# format <basename><command number>[ABCD*#]. The last characters are optional.
+# Each matching sound clip will be played in sub command number order, prefixed
+# with the command number.
+#
+#   context   - The context to look for the sound files in (e.g Default,
+#               Parrot etc).
+#   basename  - The common basename for the sound clips to find.
+#   header    - A header sound clip to play first
+#
+proc playSubcommands {context basename {header ""}} {
+  global basedir
+  global langdir
+
+  set subcmds [glob -nocomplain "$langdir/$context/$basename*.{wav,raw,gsm}"]
+  
+  if {[llength $subcmds] > 0} {
+    
+	if {$header != ""} {
+      playSilence 500
+      playMsg "Core" $header
+    }
+
+    append match_exp {^.*/} $basename {(\d+)([ABCD*#]*)\.}
+    foreach subcmd [lsort $subcmds] {
+      if [regexp $match_exp $subcmd -> number chars] {
+        playSilence 200
+        playNumber $number
+        spellWord $chars
+        playSilence 200
+        playFile $subcmd
+      }
+    }
+  }
+}

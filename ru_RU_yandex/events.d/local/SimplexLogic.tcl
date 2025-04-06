@@ -114,7 +114,7 @@ proc unknown_command {cmd} {
 }
 
 
-#
+# Logic <- Команда ... не выполнена
 # Executed when an entered DTMF command failed
 #
 proc command_failed {cmd} {
