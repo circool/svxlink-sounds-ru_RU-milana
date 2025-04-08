@@ -1,14 +1,15 @@
 #!/usr/bin/env tclsh
-global argv debugMode module_name module_list CFG_TYPE logic_name mycall report_ctcss langdir debug_active_module showPauses playAudio audioDir
+global argv debugMode module_name module_list CFG_TYPE logic_name mycall report_ctcss langdir debug_active_module showPauses playAudio checkAudioFiles silentMode
 # описание массивов для тестирования
 source "./assert_data_table/data_files_specs.tcl"
 source "dict.tcl"
 
 # режим тестирования
-set ::debugMode 1
+set ::debugMode 0
 set ::playAudio 0
-# set ::audioDir "../ru_RU"
-set ::audioDir "../ru_RU_yandex"
+set ::checkAudioFiles 1
+set ::silentMode 0
+set langdir "../ru_RU_yandex"
 set ::showPauses 0
 set ::debug_active_module 1
 
@@ -21,7 +22,7 @@ set report_ctcss "88.5"
 variable loaded_modules "ModuleEchoLink ModuleFrn ModuleMetarInfo ModuleHelp ModuleParrot"
 #
 
-set langdir "../ru_RU_yandex"
+
 variable list_languages {ru_RU en_EN}
 
 

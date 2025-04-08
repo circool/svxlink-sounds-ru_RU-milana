@@ -5,7 +5,8 @@
 # Процедуры для имитации воспроизведения сообщения
 
 proc playMsg { modulename playingWord {warn 1}} {
-	if {[info exists ::playAudio]} {
+	
+    if {[info exists ::playAudio]} {
         variable playAudio
     } else {
         variable playAudio 0
@@ -20,6 +21,43 @@ proc playMsg { modulename playingWord {warn 1}} {
     
     # puts "***DEBUG playMsg modulename=$modulename playingWord=$playingWord"
 	
+
+    # Проверяем, существует ли указанный каталог и файл
+    variable ::langdir
+    variable ::checkAudioFiles
+    set audioFile "$langdir/$modulename/$playingWord.wav"
+
+    if {[info exists ::checkAudioFiles] && $::checkAudioFiles} {
+        if {![file exists $audioFile]} {
+            # if {$warn} {
+            #     puts "\033\[35m*** WARNING: Аудиофайл '$audioFile' не найден.\033\[0m"
+            # }
+            # return 0
+            set missingFile "$langdir/missing_audio.txt"
+            set missingDir [file dirname $missingFile]
+            
+            # Создаем каталог если его нет
+            if {![file exists $missingDir]} {
+                file mkdir $missingDir
+            }
+            # Открываем файл для добавления записи
+            if {[catch {open $missingFile a} fd]} {
+                puts "\033\[31m*** ERROR: Не удалось открыть файл $missingFile для записи: $fd\033\[0m"
+            } else {
+                puts $fd "Не найден файл $audioFile"
+                close $fd
+                if {(![info exists ::silentMode] || $::silentMode == 0)} {
+                    puts "\033\[33m*** INFO: Отсутствующий аудиофайл $audioFile записан в $missingFile\033\[0m"    
+                }
+                
+            }
+        }
+    }
+
+    
+
+
+
 	# Словарь хранится в dict.tcl
 	global wordMap
 
@@ -32,9 +70,9 @@ proc playMsg { modulename playingWord {warn 1}} {
 			puts -nonewline "$line "
 		}
 	} else {
-		if {$warn} {
-			puts "\033\[31m*** WARNING: Каталог '$modulename' или файл '$playingWord' не найдены в словаре.\033\[0m"
-		}	
+		if {$warn && (![info exists ::silentMode] || $::silentMode == 0)} {
+            puts "\033\[31m*** WARNING: Каталог '$modulename' или файл '$playingWord' не найдены в словаре.\033\[0m"
+        }
 		
 		return 0
 	}
