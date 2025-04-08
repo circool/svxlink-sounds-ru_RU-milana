@@ -28,11 +28,11 @@ set module_name [namespace tail [namespace current]];
 # An "overloaded" playMsg that eliminates the need to write the module name
 # as the first argument.
 #
-# proc playMsg {msg} {
-#   variable module_name;
-#   # puts "\noverloaded EchoLink playMsg modulename = $module_name msg=$msg"
-#   ::playMsg $module_name $msg;
-# }
+proc playMsg {msg} {
+  variable module_name;
+  # puts "\noverloaded EchoLink playMsg modulename = $module_name msg=$msg"
+  ::playMsg $module_name $msg;
+}
 
 
 # Без изменений
