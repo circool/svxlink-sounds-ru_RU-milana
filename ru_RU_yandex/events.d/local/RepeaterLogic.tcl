@@ -227,10 +227,10 @@ proc repeater_up {reason} {
     }
     set Logic::prev_ident $now;
     
-    playMsg "Core" "repeater";
-    spellWord $mycall;
+    # playMsg "Core" "repeater";
+    # spellWord $mycall;
     
-    playSilence 250;
+    # playSilence 250;
 
     if {$active_module != ""} {
       playMsg "Core" "active";
